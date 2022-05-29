@@ -1,0 +1,10 @@
+intitule;producteur;reference;reference2;datepubli;champ_sexe;champ_geo;champ_autre;onglet;zone;url;annees_en_colonnes
+taux de retraités par âge;DREES;Panorama Retraités & retraites;fiche15;2022;ensemble;résidents en france;;F15_Graphique 4 compl;B6:S27;https://drees.solidarites-sante.gouv.fr/sites/default/files/2022-05/Retr2022_Fiche15.xlsx;TRUE
+taux de retraités par âge;DREES;Panorama Retraités & retraites;fiche15;2022;femmes;résidents en france;;F15_Graphique 4 compl;B31:S52;https://drees.solidarites-sante.gouv.fr/sites/default/files/2022-05/Retr2022_Fiche15.xlsx;TRUE
+taux de retraités par âge;DREES;Panorama Retraités & retraites;fiche15;2022;hommes;résidents en france;;F15_Graphique 4 compl;B56:S77;https://drees.solidarites-sante.gouv.fr/sites/default/files/2022-05/Retr2022_Fiche15.xlsx;TRUE
+taux de nouveaux retraités par âge;DREES;Panorama Retraités & retraites;fiche16;2022;ensemble;résidents en france;;F16_Graphique 2;B4:S25;https://drees.solidarites-sante.gouv.fr/sites/default/files/2022-05/Retr2022_Fiche16.xlsx;TRUE
+dépenses de retraite en % du pib;COR;rapport annuel;partie2;2021-06-10;ensemble;ensemble;;Fig 2.1;C4:BV9;https://www.cor-retraites.fr/sites/default/files/2021-07/Donn%C3%A9es_RA2021_P2_V2.xlsx;TRUE
+pension moyenne relative;COR;rapport annuel;partie2;2021-06-10;ensemble;ensemble;;Fig 2.4;C4:BV9;https://www.cor-retraites.fr/sites/default/files/2021-07/Donn%C3%A9es_RA2021_P2_V2.xlsx;TRUE
+rapport nombre cotisants sur retraités;COR;rapport annuel;partie2;2021-06-10;ensemble;ensemble;;Fig 2.4;C10:BV14;https://www.cor-retraites.fr/sites/default/files/2021-07/Donn%C3%A9es_RA2021_P2_V2.xlsx;TRUE
+âge conjoncturel de départ à la retraite;COR;rapport annuel;partie2;2021-06-10;ensemble;ensemble;;Fig 2.5;B4:BV6;https://www.cor-retraites.fr/sites/default/files/2021-07/Donn%C3%A9es_RA2021_P2_V2.xlsx;TRUE
+ressources de retraite en % du pib;COR;rapport annuel;partie2;2021-06-10;ensemble;ensemble;;Fig 2.12;B4:CA17;https://www.cor-retraites.fr/sites/default/files/2021-07/Donn%C3%A9es_RA2021_P2_V2.xlsx;TRUE
