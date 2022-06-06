@@ -18,3 +18,17 @@
 #'   \item{annee_en_colonnes}{Vaut TRUE si les colonnes dans l'onglet Excel correspondent aux années}
 #' }
 "sources_opendata"
+
+#' Taux de retraités par âge fin entre 50 et 70 ans (source DREES, modèle ANCETRE)
+#'
+#' Les données proviennent du panorama annuel de la DREES "retraités et retraites", à partir du modèle ANCETRE.
+#'
+#' @format A data frame with 1071 observations and 5 variables:
+#' \describe{
+#'   \item{age}{Age, entre 50 et 70 ans}
+#'   \item{annee}{Année}
+#'   \item{txretr}{Taux de retraités, en % (chiffre en 0 et 1)}
+#'   \item{sexe}{ensemble, femmes, hommes}
+#'   \item{geo}{lieu de résidence}
+#' }
+"txretr"
