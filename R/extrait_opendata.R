@@ -3,11 +3,11 @@
 #' Récupère des données sur la retraite diffusées en open data et référencées dans la table sources_opendata,
 #' et les restitue sous la forme d'un dataframe.
 #'
-#' @param intitule
-#' @param datepubli
-#' @param champ_sexe
-#' @param champ_geo
-#' @param champ_autre
+#' @param intitule intitulé de la série en open data
+#' @param datepubli date de publication
+#' @param champ_sexe champ retenu par sexe
+#' @param champ_geo champ géographique retenu
+#' @param champ_autre autre indication du champ retenu
 #'
 #' @importFrom openxlsx read.xlsx
 #' @importFrom cellranger as.cell_limits

@@ -13,7 +13,15 @@ extrait_opendata(
 )
 }
 \arguments{
-\item{champ_autre}{}
+\item{intitule}{intitulé de la série en open data}
+
+\item{datepubli}{date de publication}
+
+\item{champ_sexe}{champ retenu par sexe}
+
+\item{champ_geo}{champ géographique retenu}
+
+\item{champ_autre}{autre indication du champ retenu}
 }
 \value{
 un dataframe

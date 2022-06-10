@@ -23,11 +23,12 @@
 #'
 #' Les données proviennent du panorama annuel de la DREES "retraités et retraites", à partir du modèle ANCETRE.
 #'
-#' @format A data frame with 1071 observations and 5 variables:
+#' @format A data frame with 1071 observations and 6 variables:
 #' \describe{
 #'   \item{age}{Age, entre 50 et 70 ans}
 #'   \item{annee}{Année}
 #'   \item{txretr}{Taux de retraités, en % (chiffre en 0 et 1)}
+#'   \item{txnouvretr}{Taux de nouveaux retraités au cours de l'année, en % (chiffre en 0 et 1)}
 #'   \item{sexe}{ensemble, femmes, hommes}
 #'   \item{geo}{lieu de résidence}
 #' }
