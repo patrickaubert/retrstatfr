@@ -9,6 +9,7 @@
 #' @param champ_geo champ géographique retenu
 #' @param champ_autre autre indication du champ retenu
 #'
+#' @importFrom dplyr recode
 #' @importFrom openxlsx read.xlsx
 #' @importFrom cellranger as.cell_limits
 #' @importFrom janitor clean_names
@@ -19,19 +20,23 @@
 #' @export
 #'
 #' @examples
-extrait_opendata <- function(intitule,
+extrait_opendata <- function(intitule = NULL,
+                             intitulecourt = NULL,
                              datepubli = NA,
                              champ_sexe = NA, champ_geo = NA, champ_autre = NA) {
 
   # == on prévoit des formes simplifiées des intitulés disponibles dans sources_opendata
 
-  intituleloc <- recode(intitule,
-                     "taux de retraités" = "taux de retraités par âge",
-                     "txretr" = "taux de retraités par âge",
-                     "taux de nouveaux retraités" = "taux de nouveaux retraités par âge",
-                     "tauxnouvretr" = "taux de nouveaux retraités par âge")
+  intitulecourtloc <- intitulecourt
 
-  if (!(intituleloc %in% sources_opendata$intitule)) {error("Intitulé non retrouvé")}
+  if (!is.null(intitule)) {
+    intituleloc <- recode(enc2utf8(intitule),
+                          "taux de retraités" = "taux de retraités par âge",
+                          "txretr" = "taux de retraités par âge",
+                          "taux de nouveaux retraités" = "taux de nouveaux retraités par âge",
+                          "tauxnouvretr" = "taux de nouveaux retraités par âge")
+    if (!(intituleloc %in% sources_opendata$intitule)) {warning(paste0("Intitulé '",intituleloc,"' non retrouvé"))}
+  }
 
   datepubliloc <- datepubli
   champ_sexeloc <- champ_sexe
@@ -40,7 +45,8 @@ extrait_opendata <- function(intitule,
 
   # == extraction des données
 
-  donnees <- sources_opendata %>% filter(intitule==intituleloc)
+  if (!is.null(intitulecourt)) { donnees <- sources_opendata %>% filter(intitulecourt==intitulecourtloc)}
+  else { donnees <- sources_opendata %>% filter(intitule==intituleloc) }
   if (!is.na(datepubliloc)) {donnees <- donnees %>% filter(datepubli==datepubliloc)}
   if (!is.na(champ_sexeloc)) {donnees <- donnees %>% filter(champ_sexe==champ_sexeloc)}
   if (!is.na(champ_geoloc)) {donnees <- donnees %>% filter(champ_geo==champ_geoloc)}
@@ -50,7 +56,7 @@ extrait_opendata <- function(intitule,
     vals <- do.call(
       "bind_rows",
       lapply(c(1:nrow(donnees)),
-             function(i){extrait_opendata(donnees[i,]$intitule,donnees[i,]$datepubli,donnees[i,]$champ_sexe,donnees[i,]$champ_geo,donnees[i,]$champ_autre)})
+             function(i){extrait_opendata(donnees[i,]$intitule,donnees[i,]$intitulecourt,donnees[i,]$datepubli,donnees[i,]$champ_sexe,donnees[i,]$champ_geo,donnees[i,]$champ_autre)})
     )
   } else {
 
@@ -64,6 +70,17 @@ extrait_opendata <- function(intitule,
       colNames = TRUE, rowNames = FALSE
     ) %>%
       janitor::clean_names()
+
+    # == cas où plusieurs séries étaient dans le fichier excel initial
+
+    if (!(is.na(donnees$complzone))) {
+      vals <- vals %>%
+        mutate(x1=x1 %>% as.factor() %>% as.numeric() ) %>%
+        fill(x1,.direction="downup") %>%
+        filter(x1==donnees$complzone) %>%
+        select(-x1) %>%
+        rename(x1=x2)
+    }
 
   if (donnees$annees_en_colonnes) {
 
