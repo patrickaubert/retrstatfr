@@ -29,6 +29,7 @@ usethis::use_data(txretr, overwrite=TRUE)
   # extraction de tous les noms des séries de données tirées du rapport du COR
 indiccor <- (sources_opendata %>% filter(producteur=="COR",reference=="rapport annuel"))$intitulecourt
 
+
   # extraction de toutes les séries
 tabindics <- lapply(indiccor,
                     function(x){

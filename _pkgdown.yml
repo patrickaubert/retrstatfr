@@ -1,0 +1,25 @@
+title: retrstatfr
+url: https://patrickaubert.github.io/retrstatfr/
+template:
+  params:
+    bootswatch: yeti
+authors:
+  Patrick Aubert:
+    href: https://patrickaubert.netlify.app/
+reference:
+- title: Principales fonctions
+- contents:
+- title: Fonctions auxiliaires
+- contents:
+  - extrait_opendata
+- title: Jeux de données
+  desc: Données utiles diffusées en open data par la DREES, le COR, ou autres
+- contents:
+  - projcor
+  - txretr
+  - sources_opendata
+navbar:
+ right:
+    - icon: fa-github fa-lg
+      text: "github"
+      href: https://github.com/patrickaubert/retrstatfr/

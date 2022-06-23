@@ -4,54 +4,21 @@
 # retrstatfr
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
-The goal of retrstatfr is to …
+Ce package a pour but de rassembler et fournir divers outils pratiques
+pour l’analyse statistique des retraites en France, à partir des données
+de la DREES, du COR, et d’autres.
+
+Il contient notamment quelques jeux de données, et les fonctions qui
+permettent de les extraire et de les mettre en forme.
 
 ## Installation
 
-You can install the released version of retrstatfr from
-[CRAN](https://CRAN.R-project.org) with:
-
-``` r
-#install.packages("retrstatfr")
-```
-
-And the development version from [GitHub](https://github.com/) with:
+La version de développement peut être installée depuis
+[GitHub](https://github.com/) :
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("patrickaubert/retrstatfr")
 ```
-
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
-``` r
-#library(retrstatfr)
-## basic example code
-```
-
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
-
-``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
-```
-
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date.
-
-You can also embed plots, for example:
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub\!
