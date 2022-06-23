@@ -5,7 +5,8 @@
 \title{Extrait des données diffusées en open data}
 \usage{
 extrait_opendata(
-  intitule,
+  intitule = NULL,
+  intitulecourt = NULL,
   datepubli = NA,
   champ_sexe = NA,
   champ_geo = NA,

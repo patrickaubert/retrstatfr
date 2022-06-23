@@ -2,6 +2,7 @@
 
 export(extrait_opendata)
 importFrom(cellranger,as.cell_limits)
+importFrom(dplyr,recode)
 importFrom(janitor,clean_names)
 importFrom(openxlsx,read.xlsx)
 importFrom(stringr,str_replace)

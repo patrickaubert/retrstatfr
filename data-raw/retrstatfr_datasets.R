@@ -26,38 +26,54 @@ usethis::use_data(txretr, overwrite=TRUE)
 # ===================================================================================
 # données des projections du COR
 
+  # extraction de tous les noms des séries de données tirées du rapport du COR
 indiccor <- (sources_opendata %>% filter(producteur=="COR",reference=="rapport annuel"))$intitulecourt
 
+  # extraction de toutes les séries
 tabindics <- lapply(indiccor,
                     function(x){
-                      tab <- extrait_opendata(intitulecourt=x) %>% select(-sexe,-geo) %>% rename(scenario=x1)
+                      tab <- extrait_opendata(intitulecourt=x) %>%
+                        select(-sexe,-geo) %>%
+                        filter(!is.na(valeurs)) %>%
+                        rename(scenario=x1) %>%
+                        mutate(scenario = recode(
+                          scenario %>% tolower() %>% trimws(),
+                          "observé" = "obs",
+                          "observée" = "obs",
+                          "1.7999999999999999e-2"="+1,8%/an",
+                          "1.4999999999999999e-2"="+1,5%/an",
+                          "1.2999999999999999e-2"="+1,3%/an",
+                          "0.01"="+1%/an"
+                        ))
                       names(tab) <- recode(names(tab),"valeurs"=x)
                       return(tab)
                       })
 names(tabindics) <- indiccor
 
-truc <-tabindics$pensmoynetterel
+  # identification des séries pour lesquelles les valeurs en projection sont identiques dans tous les scénarios
+nbseriesscunique <- (do.call("bind_rows",tabindics) %>%
+  pivot_longer(cols=-c("scenario","annee"),names_to="serie",values_to="val") %>%
+  filter(!is.na(val)) %>%
+  select(scenario,serie) %>%
+  distinct() %>%
+  group_by(serie) %>% summarize(nbsc=n()) %>% ungroup() %>%
+  filter(nbsc<4))$serie
 
+  # corrections de certaines séries (pb dans le fichier Excel initial)
+derpartsalva <- tabindics[["partsalva"]] %>% filter(annee==max(annee))
+projparsalva <- do.call("bind_rows",
+                        replicate(2070-derpartsalva$annee,derpartsalva,simplify=FALSE)) %>%
+  mutate(annee=derpartsalva$annee+c(1:n()))
+tabindics[["partsalva"]] <- bind_rows(tabindics[["partsalva"]] ,projparsalva)
 
-pensmoyrel <- extrait_opendata("pension moyenne relative") %>%
-  select(-sexe,-geo) %>% rename(pensmoyrel=valeurs, scenario=x1)
+  # création de la table complète
+for (i in c(1:NROW(indiccor))) {
+  if (i==1) {projcor  <- tabindics[[i]]}
+  else if ((i>1) & !(indiccor[i] %in% c(nbseriesscunique))) {projcor <- projcor %>% left_join(tabindics[[i]],by=c("scenario","annee"))}
+  else if ((i>1) & (indiccor[i] %in% c(nbseriesscunique))) {projcor <- projcor %>% left_join(tabindics[[i]] %>% select(-scenario) %>% distinct(),by=c("annee"))}
+}
 
-pensrel <- extrait_opendata("pension moyenne relative") %>%
-  select(-sexe,-geo) %>% rename(pensrel=valeurs, scenario=x1)
-
-
-ratiocotretr <- extrait_opendata("rapport nombre cotisants sur retraités") %>%
-  select(-sexe,-geo) %>% rename(ratiocotretr=valeurs, scenario=x1)
-
-partretrpib <- extrait_opendata(intitulecourt="partretrpib") %>% #extrait_opendata("dépenses de retraite en pct du pib") %>%
-  select(-sexe,-geo) %>% rename(partretrpib=valeurs, scenario=x1)
-
-partressourcespib <- extrait_opendata(intitulecourt="partressourcespib") %>% #extrait_opendata("ressources de retraite en pct du pib") %>%
-  select(-sexe,-geo) %>% rename(partressourcespib=valeurs, scenario=x1)
-
-ageconjretr <- extrait_opendata(intitulecourt="ageconjretr") %>%
-  select(-sexe,-geo,-x1) %>% rename(ageconjretr=valeurs) %>%
-  filter(!is.na(ageconjretr)) %>% distinct()
+usethis::use_data(projcor, overwrite=TRUE)
 
 
 

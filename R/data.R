@@ -33,3 +33,29 @@
 #'   \item{geo}{lieu de résidence}
 #' }
 "txretr"
+
+
+#' Projections du conseil d'orientation des retraites (COR)
+#'
+#' Résultats des projections du COR, publiés dans son rapport annuel, pour les principaux indicateurs (pensions moyennes relatives, part des dépenses de retraite dans le PIB, etc.)
+#'
+#' @format Un data frame avec 223 observations et 16 variables:
+#' \describe{
+#'   \item{scenario}{Scénario de projection : "obs" pour l'observé, "+1,x%/an" pour les projections}
+#'   \item{annee}{Année}
+#'   \item{partretrpib}{Part des dépenses de retraite dans le PIB (en %)}
+#'   \item{pensmoyrel}{Pension moyenne relative au revenu d'activité moyen (en %)}
+#'   \item{pensmoynetterel}{Pensionne moyenne nette relative (en %)}
+#'   \item{ratiocotretr}{Rapport entre le nombre de cotisants et le nombre de retraités}
+#'   \item{ageconjretr}{Âge conjoncturel de départ à la retraite}
+#'   \item{partressourcespibconveec}{Part des ressources du système de retraite dans le PIB (en %), convention EEC}
+#'   \item{partressourcespibconvtcc}{Part des ressources du système de retraite dans le PIB (en %), convention TCC}
+#'   \item{partressourcespubconvepr}{Part des ressources du système de retraite dans le PIB (en %), convention EPR}
+#'   \item{nbretr}{Nombre de retraités (en millions)}
+#'   \item{nbcotis}{Nombre de cotisants (en millions)}
+#'   \item{partsalvapa}{Part des revenus d'activité dans la valeur ajoutée}
+#'   \item{pensmoynette}{Pension moyenne nette (en euros 2019)}
+#'   \item{revactmoynet}{Revenu d'activité moyen net (en euros 2019)}
+#'   \item{rationnivvie}{}
+#' }
+"projcor"

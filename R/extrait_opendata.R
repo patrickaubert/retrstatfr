@@ -60,6 +60,7 @@ extrait_opendata <- function(intitule = NULL,
     )
   } else {
 
+    if (!(length(donnees$zone)==1L)) {warning(paste("Problème rencontré pour la série ",donnees$intitulecourt))}
     rangecells <- cellranger::as.cell_limits(donnees$zone)
 
     vals <- read.xlsx(
@@ -75,7 +76,7 @@ extrait_opendata <- function(intitule = NULL,
 
     if (!(is.na(donnees$complzone))) {
       vals <- vals %>%
-        mutate(x1=x1 %>% as.factor() %>% as.numeric() ) %>%
+        mutate(x1=factor(x1,levels=unique(vals$x1)) %>% as.numeric() ) %>%
         fill(x1,.direction="downup") %>%
         filter(x1==donnees$complzone) %>%
         select(-x1) %>%
@@ -86,7 +87,10 @@ extrait_opendata <- function(intitule = NULL,
 
     cols_an <- names(vals)[grepl("^x[[:digit:]]{4}$",names(vals))]
 
+    cols_error <- names(vals)[!grepl("^x[[:digit:]]+$",names(vals))]
+
     vals <- vals %>%
+      select(-all_of(cols_error)) %>%
       pivot_longer(cols=cols_an,names_to="annee",values_to="valeurs") %>%
       mutate(annee = annee %>% str_replace("[^[:digit:]]","") %>% as.numeric() )
 
