@@ -59,3 +59,25 @@
 #'   \item{rationnivvie}{}
 #' }
 "projcor"
+
+#' Indicateurs conjoncturels de suivi des retraites en France
+#'
+#' Cette base rassemble divers indicateurs "conjoncturels" de suivi du système de retraite français.
+#'
+#' Les indicateurs dits "conjoncturels" calculent pour une année donnée les valeurs d'indicateurs qui se calculent normalement par génération.
+#' Le principe du calcul consiste à considérer la situation d'une génération fictive qui aurait, à chaque âge, les caractéristiques
+#' (taux de mortalité, probabilité d'être en emploi ou à la retraite, etc.) observées pour les personnes de cet âge au cours de l'année d'observation.
+#' Le calcul utilise la méthode de Sullivan.
+#'
+#' Les indicateurs diffusés dans la base sont soit repris des sites de diffusions de la DREES ou du COR, soit calculés à partir des données disponibles en open data.
+#'
+#' @format A data frame with 408 observations and 6 variables:
+#' \describe{
+#'   \item{indicateur}{intitulé de l'indicateur}
+#'   \item{sexe}{ensemble, femmes, hommes}
+#'   \item{annee}{année}
+#'   \item{valeur}{valeur de l'indicateur}
+#'   \item{unite}{unité de l'indicateur (%, années, etc.)}
+#'   \item{geo}{lieu de résidence}
+#' }
+"indicconj"
