@@ -281,12 +281,46 @@ urls <- (docs_cor %>%
 # essai <- do.call("bind_rows",lapply(urls[268:277],info_pdf_page1))
 extrait_info_page1 <- do.call("bind_rows",lapply(urls,info_pdf_page1))
 
+# verif <- extrait_info_page1 %>% filter(!is.na(titre_dapres_pdf))
 # verif <- extrait_info_page1 %>% filter(!is.na(info1))
 # verif <- extrait_info_page1 %>% filter(nchar(auteur_dapres_pdf)>=200) %>% mutate(ltitre=nchar(auteur_dapres_pdf))
 # taillechaine <- extrait_info_page1 %>% summarise_all(function(x){max(nchar(x),na.rm=TRUE)})
 
+# docs_cor <- docs_cor_
 
-docs_cor <- docs_cor %>% full_join(extrait_info_page1, by="url.doc")
+docs_cor <- docs_cor %>%
+  full_join(extrait_info_page1 %>%
+              filter(!is.na(titre_dapres_pdf)) %>%
+              select(seance_dapres_pdf,numdocument_dapres_pdf,titre_dapres_pdf,auteur_dapres_pdf,url.doc),
+            by="url.doc") %>%
+  mutate(titre = case_when(
+    is.na(titre) | titre=="" ~ titre_dapres_pdf,
+    titre == "- Etats-Unis" ~ titre_dapres_pdf,
+    grepl("^[Dd]ocument[[:space:]]*(n°|N°|)[[:space:]]*[[:digit:]IVX\\.\\-]+([Bb]is|)$",titre)  ~ titre_dapres_pdf,
+    TRUE ~ titre),
+    num_document = case_when(
+      !is.na(num_document) ~ num_document,
+      TRUE ~ numdocument_dapres_pdf     ),
+    auteur = case_when(
+      auteur == "- Italie" ~ titre_dapres_pdf,
+      !is.na(auteur) & auteur!="" ~ auteur,
+      TRUE ~ auteur_dapres_pdf     ),
+    type = case_when(
+      !is.na(type) ~ type,
+      grepl("^Document",titre) ~ "document",
+      grepl("^Note de présentation générale",titre) ~ "document",
+      grepl("^Annexe",titre) ~ "document",
+      grepl("^Diaporama",titre) ~ "diaporama",
+      grepl("^Présentation",titre) ~ "diaporama",
+      grepl('^("[Ll]e [dD]|[Ll]e [dD]|D)ossier en bref',titre) ~ "dossier en bref",
+      grepl("^Dossier complet$",titre) ~ "dossier complet",
+      grepl("^Document",num_document) ~ "document",
+      grepl("^Présentations",partie) ~ "diaporama")
+    )
+
+# verif <- docs_cor %>% filter(is.na(type))
+# verif <- docs_cor %>% filter(is.na(titre) | titre=="")
+# verif <- docs_cor %>% filter(is.na(titre) | titre=="") %>% select(url.doc,titre_complet) %>% left_join(extrait_info_page1, by="url.doc")
 
 # == complète la table des séances du COR avec les informations tirées des pages par séance
 
@@ -319,8 +353,8 @@ usethis::use_data(docs_cor,
                   overwrite=TRUE)
 
 ## A FAIRE
-# - document la base
-# - créer variable "num_doc", "titre_complet"
+# - documenter la base
+# - améliorer la partie "extraction page 1 des pdf" = traitement de l'info s'il y a plus de deux lignes d'information !
 # - aller chercher titre et auteur dans le pdf si manquant
 
 # == sauvegarde des bases en format .csv

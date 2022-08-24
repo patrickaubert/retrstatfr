@@ -100,5 +100,14 @@ dossiers_en_bref <- dossiers_en_bref %>%
 
 # == sauvegarde des bases
 
+dossiers_en_bref_cor <- dossiers_en_bref
+
 usethis::use_data(dossiers_en_bref_cor,       overwrite=TRUE)
+
 # A FAIRE : ajouter dans document !!
+
+# == sauvegarde des bases en format .csv
+
+write.csv2(dossiers_en_bref_cor,
+           file=gzfile("data-raw/dossiers_en_bref_cor.csv.gz"),
+           row.names = FALSE, fileEncoding = "UTF-8")
