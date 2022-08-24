@@ -39,10 +39,56 @@ seances <- function(npage) {
 
 extrait_page.seances <- do.call("bind_rows",lapply(0:31,seances))
 
-page.seances <- extrait_page.seances %>%
+page.seances_brut <- extrait_page.seances %>%
   mutate(annee = date.seance %>% str_extract("[[:digit:]]{4}$"),
          mois = date.seance %>% str_extract("(?<=[[:space:]])[[:alpha:]]+(?=[[:space:]][[:digit:]]{4}$)"),
          jour = date.seance %>% str_extract("(?<=[[:space:]])[[:digit:]]+(?=[[:space:]]*[[:alpha:]]+[[:space:]]*[[:digit:]]{4}$)"))
+
+page.seances <- page.seances_brut %>% select(-nb) %>% distinct()
+
+# == fonction d'extraction des informations relatives à la séance (utile pour les pages html séances n'ayant aucun document à télécharger, pour lesquelles la fonction "document" ci-après ne renvoie rien)
+
+infoseance <- function(urlloc) {
+  #lpagedocs <- list()
+  #for (i in 1:nrow(page.seances)) {
+  pagedocs <- read_html( paste0(urlcor,urlloc) )
+  #champ.a.extraire <- "h4,h6,span,a,p"
+  champ.a.extraire <- ".panel__title,.media__file_author,.action__btn,.btn,.field h4,.field__item p,.field__item a,.field__item span"
+  page.docs <- data.frame(
+    txt = pagedocs %>%  html_nodes(champ.a.extraire) %>% html_text() %>% trimws(),
+    ref = pagedocs %>%  html_nodes(champ.a.extraire) %>% html_attr("href"),
+    type = pagedocs %>%  html_nodes(champ.a.extraire) %>% html_attr("class")
+  ) %>%
+    #distinct() %>%
+    mutate(txt = ifelse(txt=="Lien de téléchargement",ref,txt) %>%
+             str_replace_all("[[:space:]]+"," "),
+           type = case_when(
+             #type=="field__item" & grepl("^[IVX]+[[:space:]]*(\\.|\\-|–)",txt ~  "partie",
+             grepl("^field",type) ~  "partie",
+             is.na(type) ~ "txt",
+             TRUE ~  type) ) %>%
+    filter(!grepl("^Lien",txt),txt!="Accueil",txt!="") %>%
+    select(-ref) #%>%
+  #mutate(type = ifelse(is.na(type),"texte",type) %>% str_replace("[[:space:]].*$",""))
+  # texte introductif et mots-clés de la séance
+  texte.introductif <- (page.docs %>% filter(type=="txt",txt!="",txt!=" ") )$txt %>% paste(collapse="\n")
+  if (texte.introductif=="") {
+    autrestxts <- pagedocs %>%  html_nodes(".field__item") %>% html_text() %>% trimws() %>%
+      data.frame() %>%
+      filter(!(. %in% c(""," ")))
+    texte.introductif <- autrestxts$.[1]
+  }
+  #texte.introductif <- (page.docs %>% filter(type=="txt") %>% arrange(-nchar(txt)))$txt[1]
+  mots.cles <- (page.docs %>% filter(type=="btn btn-secondary",txt!="RECHERCHE AVANCÉE"))$txt %>% paste(collapse=" / ")
+  # documents
+  infoseance <- data.frame(
+    url.seance = urlloc,
+    texte.introductif = texte.introductif,
+    mots.cles = mots.cles
+  )
+  #lpagedocs[[i]] <- page.docs %>% mutate(i = i)
+  return(infoseance)
+}
 
 # == extrait les principales informations relatives aux documents de chaque séance (dont l'url des fichiers pdf)
 
@@ -50,29 +96,47 @@ documents <- function(i) {
   #lpagedocs <- list()
   #for (i in 1:nrow(page.seances)) {
   pagedocs <- read_html( paste0(urlcor,page.seances$url.seance[i]) )
+  # pagedocs <- read_html( paste0(urlcor,urlloc) )
+  # -- première lecture : pages "standards" avec des boutons pour le téléchargement des PDF
   #champ.a.extraire <- "h4,h6,span,a,p"
-  champ.a.extraire <- ".panel__title,.media__file_author,.action__btn,.btn,.field__item"
+  champ.a.extraire <- ".panel__title,.media__file_author,.action__btn,.btn,.field h4,.field__item p,.field__item a,.field__item span"
   page.docs <- data.frame(
     txt = pagedocs %>%  html_nodes(champ.a.extraire) %>% html_text() %>% trimws(),
     ref = pagedocs %>%  html_nodes(champ.a.extraire) %>% html_attr("href"),
     type = pagedocs %>%  html_nodes(champ.a.extraire) %>% html_attr("class")
     ) %>%
+    #distinct() %>%
     mutate(txt = ifelse(txt=="Lien de téléchargement",ref,txt) %>%
-             str_replace_all("[[:space:]]+"," ")) %>%
+             str_replace_all("[[:space:]]+"," "),
+           type = case_when(
+             #type=="field__item" & grepl("^[IVX]+[[:space:]]*(\\.|\\-|–)",txt ~  "partie",
+             grepl("^field",type) ~  "partie",
+             is.na(type) ~ "txt",
+             TRUE ~  type) ) %>%
     filter(!grepl("^Lien",txt),txt!="Accueil",txt!="") %>%
     select(-ref) #%>%
     #mutate(type = ifelse(is.na(type),"texte",type) %>% str_replace("[[:space:]].*$",""))
-  # texte introductif et mots-clés de la séance
-  texte.introductif <- (page.docs %>% filter(type=="field__item") %>% arrange(-nchar(txt)))$txt[1]
-  #texte.introductif <- (page.docs %>% filter(type=="texte") %>% arrange(-nchar(txt)))$txt[1]
+  # -- deuxième lecture : pages sans boutons pour le téléchargement des PDF
+  if (!("panel__title" %in% unique(page.docs$type))) {
+    champ.a.extraire.bis <- ".text__element_in"
+  }
+  # -- texte introductif et mots-clés de la séance
+  texte.introductif <- (page.docs %>% filter(type=="txt",txt!="",txt!=" ") )$txt %>% paste(collapse="\n")
+  if (texte.introductif=="") {
+    autrestxts <- pagedocs %>%  html_nodes(".field__item") %>% html_text() %>% trimws() %>%
+      data.frame() %>%
+      filter(!(. %in% c(""," ")))
+    texte.introductif <- autrestxts$.[1]
+  }
+  #texte.introductif <- (page.docs %>% filter(type=="txt") %>% arrange(-nchar(txt)))$txt[1]
   mots.cles <- (page.docs %>% filter(type=="btn btn-secondary",txt!="RECHERCHE AVANCÉE"))$txt %>% paste(collapse=" / ")
   # documents
   page.docs <- page.docs %>%
-    filter(type %in% c("panel__title","media__file_author","action__btn","field")) %>%
+    filter(type %in% c("panel__title","media__file_author","action__btn","partie")) %>%
     mutate(type = type %>% recode("panel__title" = "titre",
                                   "media__file_author" = "auteur",
                                   "action__btn" = "url.doc",
-                                  "field" = "partie"),
+                                  "partie" = "partie"),
            seance = page.seances$titre.seance[i],
            date.seance = page.seances$date.seance[i],
            url.seance = page.seances$url.seance[i],
@@ -91,6 +155,8 @@ extrait_docs_cor <- do.call("bind_rows",lapply(1:nrow(page.seances),documents))
 
 # correction des quelques cas problématiques + mise en forme de la table
 
+# pb avec réunion du 18 mars 2009 = titres faux sur page html ("etats-unis" pour tous les docs)
+
 docs_cor_brut <- extrait_docs_cor %>%
   mutate(type = ifelse(txt=="Projections à l'horizon 2060 - des actifs plus nombreux et plus âgés",
                        "titre",type),
@@ -100,21 +166,27 @@ docs_cor_brut <- extrait_docs_cor %>%
   mutate(nb.partie = ifelse(type=="partie",1,0) %>% cumsum(),
          nb.doc = ifelse(type=="titre",1,0) %>% cumsum() ) %>%
   ungroup() %>%
-  pivot_wider(id_cols=-c("txt","type"),names_from="type",values_from="txt") %>%
+  pivot_wider(id_cols=-c("txt","type"),names_from="type",values_from="txt") %>% # ,values_fn=length
   select(-nb.partie,-nb.doc) %>%
   group_by(seance,date.seance,url.seance,annee,mois,jour,texte.introductif,mots.cles) %>%
   fill(partie, .direction="down") %>%
   ungroup() %>%
   filter(!is.na(titre))
 
+# verif <- docs_cor_brut %>% filter(titre>1 | auteur>1 | url.doc>1)
+
 docs_cor <- docs_cor_brut %>%
   rename(titre_complet = titre) %>%
   mutate(type = case_when(
         grepl("^Document",titre_complet) ~ "document",
         grepl("^Note de présentation générale",titre_complet) ~ "document",
+        grepl("^Annexe",titre_complet) ~ "document",
         grepl("^Diaporama",titre_complet) ~ "diaporama",
         grepl("^Présentation",titre_complet) ~ "diaporama",
-        grepl("^(Le d|D)ossier en bref",titre_complet) ~ "dossier en bref"    ),
+        grepl("^(Le d|D)ossier en bref",titre_complet) ~ "dossier en bref",
+        grepl("\\.(xlsx|xls)$",url.doc) ~ "fichier excel",
+        grepl("\\.(pptx|ppt)$",url.doc) ~ "diaporama" ,
+        grepl("^Dossier complet$",titre_complet) ~ "dossier complet"),
         # correction du cas où la 2e partie du titre est dans la ligne auteur
         titre_complet = ifelse(grepl("^[[:lower:]]",auteur),paste(titre_complet,auteur),titre_complet),
         auteur = ifelse(grepl("^[[:lower:]]",auteur),NA,auteur),
@@ -137,6 +209,7 @@ docs_cor <- docs_cor_brut %>%
 # verif <- docs_cor %>% filter(!is.na(num_document)) %>% arrange(-nchar(num_document))
 # => cas à corriger à la main
 # verif <- docs_cor %>% filter(grepl("^[[:lower:]]",auteur))
+# verif <- docs_cor %>% filter(is.na(type))
 
 # == complète l'information sur les documents à partir des premières pages des pdf
 
@@ -217,12 +290,27 @@ docs_cor <- docs_cor %>% full_join(extrait_info_page1, by="url.doc")
 
 # == complète la table des séances du COR avec les informations tirées des pages par séance
 
+# attention : certaines séances plénières ont plusieurs pages web, donc la clé est bien année+mois+jour+url.seance (ne pas se contenter de la date !!)
+
+textes.seances <- docs_cor_brut %>%
+  select(annee,mois,jour,url.seance,texte.introductif,mots.cles) %>%
+  distinct()
+
 seances_cor <- page.seances %>%
-  select(-nb) %>%
-  left_join(truc<-docs_cor_brut %>%
-              select(annee,mois,jour,texte.introductif,mots.cles) %>%
-              distinct(),
-            by=c("annee","mois","jour"))
+  left_join(textes.seances ,   by=c("annee","mois","jour","url.seance"))
+
+textes.seances.retrouves <- seances_cor %>% filter(!is.na(texte.introductif))
+textes.seances.missing <- seances_cor %>% filter(is.na(texte.introductif))
+
+compl.seances <- do.call("bind_rows",lapply(textes.seances.missing$url.seance,infoseance)) %>%
+  distinct()
+
+seances_cor <- bind_rows(
+  textes.seances.retrouves,
+  textes.seances.missing %>%
+    select(-texte.introductif,-mots.cles) %>%
+    left_join(compl.seances, by="url.seance")
+  )
 
 # == sauvegarde des bases
 
