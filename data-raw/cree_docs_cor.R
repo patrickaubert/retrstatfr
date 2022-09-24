@@ -354,8 +354,9 @@ usethis::use_data(docs_cor,
 
 ## A FAIRE
 # - documenter la base
+#-  revoir éventuellement l'extraction pour les pages séances sans bouton d'extraction des PDF ??
 # - améliorer la partie "extraction page 1 des pdf" = traitement de l'info s'il y a plus de deux lignes d'information !
-# - aller chercher titre et auteur dans le pdf si manquant
+# - refaire aller chercher titre et auteur dans le pdf si manquant (cf étape précédente)
 
 # == sauvegarde des bases en format .csv
 

@@ -5,7 +5,7 @@
 \alias{projcor}
 \title{Projections du conseil d'orientation des retraites (COR)}
 \format{
-Un data frame avec 223 observations et 16 variables:
+Un data frame avec 491 observations et 21 variables:
 \describe{
 \item{scenario}{Scénario de projection : "obs" pour l'observé, "+1,x\%/an" pour les projections}
 \item{annee}{Année}
@@ -14,9 +14,13 @@ Un data frame avec 223 observations et 16 variables:
 \item{pensmoynetterel}{Pensionne moyenne nette relative (en \%)}
 \item{ratiocotretr}{Rapport entre le nombre de cotisants et le nombre de retraités}
 \item{ageconjretr}{Âge conjoncturel de départ à la retraite}
+\item{partressourcespib}{Part des ressources du système de retraite dans le PIB (en \%), observé}
 \item{partressourcespibconveec}{Part des ressources du système de retraite dans le PIB (en \%), convention EEC}
 \item{partressourcespibconvtcc}{Part des ressources du système de retraite dans le PIB (en \%), convention TCC}
 \item{partressourcespubconvepr}{Part des ressources du système de retraite dans le PIB (en \%), convention EPR}
+\item{txprelev}{Taux de prélèvement global (en \% de la masse des revenus d'activité), observé}
+\item{txprelevconveec}{Taux de prélèvement global (en \% de la masse des revenus d'activité), convention EEC}
+\item{txprelevconvepr}{Taux de prélèvement global (en \% de la masse des revenus d'activité), convention EPR}
 \item{nbretr}{Nombre de retraités (en millions)}
 \item{nbcotis}{Nombre de cotisants (en millions)}
 \item{partsalvapa}{Part des revenus d'activité dans la valeur ajoutée}

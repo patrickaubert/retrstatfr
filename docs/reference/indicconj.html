@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Projections du conseil d'orientation des retraites (COR) — projcor • retrstatfr</title>
+<title>Indicateurs conjoncturels de suivi des retraites en France — indicconj • retrstatfr</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Projections du conseil d'orientation des retraites (COR) — projcor" />
-<meta property="og:description" content="Résultats des projections du COR, publiés dans son rapport annuel, pour les principaux indicateurs (pensions moyennes relatives, part des dépenses de retraite dans le PIB, etc.)" />
+<meta property="og:title" content="Indicateurs conjoncturels de suivi des retraites en France — indicconj" />
+<meta property="og:description" content="Cette base rassemble divers indicateurs &quot;conjoncturels&quot; de suivi du système de retraite français." />
 
 
 
@@ -109,44 +109,37 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Projections du conseil d'orientation des retraites (COR)</h1>
+    <h1>Indicateurs conjoncturels de suivi des retraites en France</h1>
     
-    <div class="hidden name"><code>projcor.Rd</code></div>
+    <div class="hidden name"><code>indicconj.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Résultats des projections du COR, publiés dans son rapport annuel, pour les principaux indicateurs (pensions moyennes relatives, part des dépenses de retraite dans le PIB, etc.)</p>
+    <p>Cette base rassemble divers indicateurs "conjoncturels" de suivi du système de retraite français.</p>
     </div>
 
-    <pre class="usage"><span class='va'>projcor</span></pre>
+    <pre class="usage"><span class='va'>indicconj</span></pre>
 
 
     <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>Un data frame avec 491 observations et 21 variables:</p><dl>
-<dt>scenario</dt><dd><p>Scénario de projection : "obs" pour l'observé, "+1,x%/an" pour les projections</p></dd>
-<dt>annee</dt><dd><p>Année</p></dd>
-<dt>partretrpib</dt><dd><p>Part des dépenses de retraite dans le PIB (en %)</p></dd>
-<dt>pensmoyrel</dt><dd><p>Pension moyenne relative au revenu d'activité moyen (en %)</p></dd>
-<dt>pensmoynetterel</dt><dd><p>Pensionne moyenne nette relative (en %)</p></dd>
-<dt>ratiocotretr</dt><dd><p>Rapport entre le nombre de cotisants et le nombre de retraités</p></dd>
-<dt>ageconjretr</dt><dd><p>Âge conjoncturel de départ à la retraite</p></dd>
-<dt>partressourcespib</dt><dd><p>Part des ressources du système de retraite dans le PIB (en %), observé</p></dd>
-<dt>partressourcespibconveec</dt><dd><p>Part des ressources du système de retraite dans le PIB (en %), convention EEC</p></dd>
-<dt>partressourcespibconvtcc</dt><dd><p>Part des ressources du système de retraite dans le PIB (en %), convention TCC</p></dd>
-<dt>partressourcespubconvepr</dt><dd><p>Part des ressources du système de retraite dans le PIB (en %), convention EPR</p></dd>
-<dt>txprelev</dt><dd><p>Taux de prélèvement global (en % de la masse des revenus d'activité), observé</p></dd>
-<dt>txprelevconveec</dt><dd><p>Taux de prélèvement global (en % de la masse des revenus d'activité), convention EEC</p></dd>
-<dt>txprelevconvepr</dt><dd><p>Taux de prélèvement global (en % de la masse des revenus d'activité), convention EPR</p></dd>
-<dt>nbretr</dt><dd><p>Nombre de retraités (en millions)</p></dd>
-<dt>nbcotis</dt><dd><p>Nombre de cotisants (en millions)</p></dd>
-<dt>partsalvapa</dt><dd><p>Part des revenus d'activité dans la valeur ajoutée</p></dd>
-<dt>pensmoynette</dt><dd><p>Pension moyenne nette (en euros 2019)</p></dd>
-<dt>revactmoynet</dt><dd><p>Revenu d'activité moyen net (en euros 2019)</p></dd>
-<dt>rationnivvie</dt><dd><p></p></dd>
+    <p>A data frame with 408 observations and 6 variables:</p><dl>
+<dt>indicateur</dt><dd><p>intitulé de l'indicateur</p></dd>
+<dt>sexe</dt><dd><p>ensemble, femmes, hommes</p></dd>
+<dt>annee</dt><dd><p>année</p></dd>
+<dt>valeur</dt><dd><p>valeur de l'indicateur</p></dd>
+<dt>unite</dt><dd><p>unité de l'indicateur (%, années, etc.)</p></dd>
+<dt>geo</dt><dd><p>lieu de résidence</p></dd>
 
 </dl>
 
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>Les indicateurs dits "conjoncturels" calculent pour une année donnée les valeurs d'indicateurs qui se calculent normalement par génération.
+Le principe du calcul consiste à considérer la situation d'une génération fictive qui aurait, à chaque âge, les caractéristiques
+(taux de mortalité, probabilité d'être en emploi ou à la retraite, etc.) observées pour les personnes de cet âge au cours de l'année d'observation.
+Le calcul utilise la méthode de Sullivan.</p>
+<p>Les indicateurs diffusés dans la base sont soit repris des sites de diffusions de la DREES ou du COR, soit calculés à partir des données disponibles en open data.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

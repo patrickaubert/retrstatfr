@@ -45,8 +45,8 @@ extrait_opendata <- function(intitule = NULL,
 
   # == extraction des données
 
-  if (!is.null(intitulecourt)) { donnees <- sources_opendata %>% filter(intitulecourt==intitulecourtloc)}
-  else { donnees <- sources_opendata %>% filter(intitule==intituleloc) }
+  if (!is.null(intitulecourt)) { donnees <- sources_opendata %>% filter(intitulecourt==intitulecourtloc)
+  } else { donnees <- sources_opendata %>% filter(intitule==intituleloc) }
   if (!is.na(datepubliloc)) {donnees <- donnees %>% filter(datepubli==datepubliloc)}
   if (!is.na(champ_sexeloc)) {donnees <- donnees %>% filter(champ_sexe==champ_sexeloc)}
   if (!is.na(champ_geoloc)) {donnees <- donnees %>% filter(champ_geo==champ_geoloc)}
@@ -72,11 +72,19 @@ extrait_opendata <- function(intitule = NULL,
     ) %>%
       janitor::clean_names()
 
+    names(vals)[1] <- "x1"
+    vals <- vals %>% mutate(x1=as.character(x1))
+
     # == cas où plusieurs séries étaient dans le fichier excel initial
 
     if (!(is.na(donnees$complzone))) {
+      names(vals)[2] <- "x2"
       vals <- vals %>%
-        mutate(x1=factor(x1,levels=unique(vals$x1)) %>% as.numeric() ) %>%
+        mutate(x2 = as.character(x2),
+               x1= if_else((is.na(x1) | x1=="") & grepl("obs",tolower(x2)),x2,x1))
+      vals <- vals %>%
+        mutate(x1= if_else(is.na(x1) | x1=="",x2,x1),
+               x1=factor(x1,levels=unique(vals$x1)) %>% as.numeric() ) %>%
         fill(x1,.direction="downup") %>%
         filter(x1==donnees$complzone) %>%
         select(-x1) %>%
@@ -96,6 +104,7 @@ extrait_opendata <- function(intitule = NULL,
 
   }
 
+    if (!is.na(datepubli)) {vals <- vals %>% mutate(datepubli=datepubli)}
     if (!is.na(donnees$champ_sexe)) {vals <- vals %>% mutate(sexe=donnees$champ_sexe)}
     if (!is.na(donnees$champ_geo)) {vals <- vals %>% mutate(geo=donnees$champ_geo)}
     if (!is.na(donnees$champ_autre)) {vals <- vals %>% mutate(champ_autre=donnees$champ_autre)}

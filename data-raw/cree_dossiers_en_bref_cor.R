@@ -104,7 +104,9 @@ dossiers_en_bref_cor <- dossiers_en_bref
 
 usethis::use_data(dossiers_en_bref_cor,       overwrite=TRUE)
 
-# A FAIRE : ajouter dans document !!
+# A FAIRE :
+#- documenter base
+#- refaire l'extraction après avoir amélioré la base docs_cor
 
 # == sauvegarde des bases en format .csv
 
