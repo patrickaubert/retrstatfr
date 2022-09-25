@@ -85,3 +85,70 @@
 #'   \item{geo}{lieu de résidence}
 #' }
 "indicconj"
+
+#' Index des titres et dates des séances mensuelles du COR
+#'
+#' (version provisoire, encore en cours de construction)
+#'
+#' Données extraites fin août 2022, s'arrêtant à la séance de juillet 2022.
+#'
+#' @format A data frame with 304 observations and 8 variables:
+#' \describe{
+#'   \item{titre.seance}{Titre de la séance}
+#'   \item{date.seance}{Date de la séance}
+#'   \item{url.seance}{url de la page présentant la séance sur le site internet du COR}
+#'   \item{annee}{Année de la séance}
+#'   \item{mois}{Mois de la séance}
+#'   \item{jour}{Jour de la séance}
+#'   \item{texte.introductif}{Texte de présentation de la séance}
+#'   \item{mots.cles}{Mots clés de la séance (tels que fournis par le COR)}
+#' }
+"seances_cor"
+
+#' Table des documents diffusés dans le cadre des séances mensuelles du COR
+#'
+#' (version provisoire, encore en cours de construction)
+#'
+#' Données extraites fin août 2022, s'arrêtant à la séance de juillet 2022.
+#'
+#' @format A data frame with 2332 observations and 19 variables:
+#' \describe{
+#'   \item{seance}{Titre de la séance}
+#'   \item{date.seance}{Date de la séance}
+#'   \item{url.seance}{url de la page présentant la séance sur le site internet du COR}
+#'   \item{annee}{Année de la séance}
+#'   \item{mois}{Mois de la séance}
+#'   \item{jour}{Jour de la séance}
+#'   \item{texte.introductif}{Texte de présentation de la séance}
+#'   \item{mots.cles}{Mots clés de la séance (tels que fournis par le COR)}
+#'   \item{partie}{Titre de la partie}
+#'   \item{titre_complet}{Titre complet du document}
+#'   \item{auteur}{Auteur(s) du document}
+#'   \item{url.doc}{Url du document sur le site internet du COR}
+#'   \item{type}{Type de document (document, diaporama, fichier excel...)}
+#'   \item{titre}{Titre du document}
+#'   \item{num_document}{Numéro du document}
+#'   \item{seance_dapres_pdf}{Titre de la séance, lu dans le fichier pdf}
+#'   \item{numdocument_dapres_pdf}{Numero du document, lu dans le fichier pdf}
+#'   \item{titre_dapres_pdf}{Titre du document, lu dans le fichier pdf}
+#'   \item{auteur_dapres_pdf}{Auteur(s) du document, lu dans le fichier pdf}
+#' }
+"docs_cor"
+
+#' Une base des questions/réponses extraites des documents "Le dossier en bref" du COR
+#'
+#' (version provisoire, encore en cours de construction)
+#'
+#' Données extraites fin août 2022, s'arrêtant à la séance de juillet 2022.
+#'
+#' @format A data frame with 582 observations and 7 variables:
+#' \describe{
+#'   \item{question}{Texte de la question extrait du document}
+#'   \item{reponse}{Réponse à la question extrait du document}
+#'   \item{reponse_avec_url}{Réponse à la question extrait du document, avec lien hypertexte vers les documents cités}
+#'   \item{partie}{Titre intermédiaire extrait du document}
+#'   \item{url.doc}{url du document sur le site internet du COR}
+#'   \item{date.seance}{Date de la séance}
+#'   \item{titre.seance}{Titre de la séance}
+#' }
+"dossiers_en_bref_cor"
