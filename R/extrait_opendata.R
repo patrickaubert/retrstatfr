@@ -35,7 +35,11 @@ extrait_opendata <- function(intitule = NULL,
                           "txretr" = "taux de retraités par âge",
                           "taux de nouveaux retraités" = "taux de nouveaux retraités par âge",
                           "tauxnouvretr" = "taux de nouveaux retraités par âge")
-    if (!(intituleloc %in% sources_opendata$intitule)) {warning(paste0("Intitulé '",intituleloc,"' non retrouvé"))}
+    if (!(intituleloc %in% sources_opendata$intitule)) {
+      stop( paste0(
+        "Intitulé '",intituleloc,"' non retrouvé. Les séries disponibles sont : ",
+        paste(unique(sources_opendata$intitule),collapse=" ; ")  )    )
+      }
   }
 
   datepubliloc <- datepubli
@@ -58,6 +62,11 @@ extrait_opendata <- function(intitule = NULL,
       lapply(c(1:nrow(donnees)),
              function(i){extrait_opendata(donnees[i,]$intitule,donnees[i,]$intitulecourt,donnees[i,]$datepubli,donnees[i,]$champ_sexe,donnees[i,]$champ_geo,donnees[i,]$champ_autre)})
     )
+  } else if (grepl("csv(/|)$",donnees$url)) {
+
+    vals <- read.csv2(file=donnees$url,
+                      header=TRUE,sep=";")
+
   } else {
 
     if (!(length(donnees$zone)==1L)) {warning(paste("Problème rencontré pour la série ",donnees$intitulecourt))}
@@ -72,12 +81,14 @@ extrait_opendata <- function(intitule = NULL,
     ) %>%
       janitor::clean_names()
 
+    nomcol1 <- names(vals)[1]
     names(vals)[1] <- "x1"
     vals <- vals %>% mutate(x1=as.character(x1))
 
     # == cas où plusieurs séries étaient dans le fichier excel initial
 
     if (!(is.na(donnees$complzone))) {
+      nomcol2 <- names(vals)[2]
       names(vals)[2] <- "x2"
       vals <- vals %>%
         mutate(x2 = as.character(x2),
@@ -108,6 +119,12 @@ extrait_opendata <- function(intitule = NULL,
     if (!is.na(donnees$champ_sexe)) {vals <- vals %>% mutate(sexe=donnees$champ_sexe)}
     if (!is.na(donnees$champ_geo)) {vals <- vals %>% mutate(geo=donnees$champ_geo)}
     if (!is.na(donnees$champ_autre)) {vals <- vals %>% mutate(champ_autre=donnees$champ_autre)}
+
+    # == remet les noms de colonnes
+
+    if (tolower(nomcol1) %in% c("age")) {
+      names(vals)[1] <- nomcol1
+    }
 
   }
 
