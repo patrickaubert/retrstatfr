@@ -5,7 +5,8 @@
 #' @param fichier emplacement du fichier Excel contenant les données
 #' @param tableaux nom des tableaux (onglets du fichier Excel)
 #'
-#' @importFrom openxlsx getSheetNames,read.xlsx
+#' @importFrom openxlsx getSheetNames
+#' @importFrom openxlsx read.xlsx
 #' @importFrom janitor clean_names
 #'
 #' @return une liste de data.frame
