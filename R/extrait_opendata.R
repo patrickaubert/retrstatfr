@@ -17,9 +17,7 @@
 #' @importFrom stringr str_replace
 #'
 #' @return un dataframe
-#' @export
-#'
-#' @examples
+#' @export extrait_opendata
 extrait_opendata <- function(intitule = NULL,
                              intitulecourt = NULL,
                              datepubli = NA,

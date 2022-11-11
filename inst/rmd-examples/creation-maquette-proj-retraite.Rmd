@@ -7,11 +7,80 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+#library(retrstatfr)
+library(healthexpectancies)
+library(janitor)
+
 ```
 
-Ce document décrit les modalités, la création et le calibrage d'une maquette agrégée simulant la situation financière des retraites en France. 
+Ce document décrit les modalités, la création et le calibrage d'une maquette agrégée simulant la situation financière des retraites en France. Son objectif est de réaliser (relativement) simplement des simulations de variantes des projections des retraites à long terme, afin de disposer d'ordres de grandeurs utiles pour le débat. 
 
-Son objectif est de réaliser (relativement) simplement des simulations de variantes des projections des retraites à long terme, afin de disposer d'ordres de grandeurs utiles pour le débat. Elle reste bien sûr beaucoup plus approximative que les projections officielles réalisées par le COR ou les organismes disposant d'outils de projection. Compte tenu de la complexité du système de retraite, le recours à des outils sophistiqués, notamment de microsimulation, est indispensable pour réaliser des projections fiables. Mais ces outils sont généralement lourds, et demandent donc un temps important pour réaliser des simulations, même pour les équipes déjà formées et habituées aue maniement des modèles. Ceux-ci nécessitent en outre généralement l'accès à des données à caractère personnel, qui ne sont accessibles que dans un cadre sécurisé. La maquette simplifiée qu'on sert à construire ici a donc pour but de permettre de réaliser des variantes de projection simples, même si on ne dispose pas de beaucoup de temps, ni d'un accès aux modèles de microsimulation ou aux données sur lesquelles il s'appuie, au prix d'un caractère plus approximatif des résultats (dans tous les cas, il sera nécessaire que ces résultats soient vérifiés par de "vraies" simulations).
+Elle reste bien sûr beaucoup plus approximative que les projections officielles réalisées par le COR ou les organismes disposant d'outils de projection, et assume en particulier totalement le fait que les hypothèses de linéarité sur lesquelles elle repose ne rendent pas compte du caractère éminemment non-linéaire du système retraite français. Compte tenu de la complexité du système de retraite, le recours à des outils sophistiqués, notamment de microsimulation, est en effet totalement indispensable pour réaliser des projections fiables. Mais ces outils sont généralement lourds, et demandent donc un temps important pour réaliser des simulations, même pour les équipes déjà formées et habituées à leur maniement. Ceux-ci nécessitent en outre généralement l'accès à des données à caractère personnel, qui ne sont accessibles que dans un cadre sécurisé. 
+
+La maquette simplifiée qu'on cherche à construire ici a donc pour but de permettre de réaliser des variantes de projection simples, même si on ne dispose pas de beaucoup de temps, ni d'un accès aux modèles de microsimulation ou aux données sur lesquelles il s'appuie, au prix d'un caractère plus approximatif des résultats. Son but est de permettre une première vérification rapide des arguments ou propositions émises dans le cadre du débat public sur les retraites, mais, dans tous les cas, il sera nécessaire que les résultats soient ensuite vérifiés par de "vraies" simulations.
+
+Les principes généraux de la maquette sont les suivants :
+
+- elle s'appuie uniquement sur des données agrégées ou semi-agrégées disponibles en open data (diffusées pour l'essentiel par le COR, la DREES, et l'Insee) ;
+- elle est calibrée sur les publications officielles, notamment les projections du COR rendues publiques dans son rapport annuel ; en particulier, pour les scénarios correspondant exactement à ceux du COR, la maquette fournit des résultats identiques par construction ;
+- ses déterminants sont les mêmes que les projections du COR : les effectifs et les taux d'activité projetés (disponibles dans les projections démographiques et de population active de l'Insee), les paramètres de législation, et les paramètres économiques déterminés par le COR. Les variantes qu'il sera possible de réaliser avec la maquette ne porteront donc que sur ces paramètres.
+
+[MASCEPOR = maquette agrégée simplifiée et calibrée pour l'extrapolation des projections officielles de retraite]
+
+# Principe
+
+On s'appuie sur les données-sources suivantes :
+
+- les projections macro du COR pour les principaux agrégats (ressources et dépenses de retraite en part de PIB, etc.), disponibles pour chaque année sur le passé depuis 2003 et en projection jusqu'en 2017, dans divers scénarios économiques ;
+- les données statistiques du modèle ANCETRE de la DREES sur les taux de retraités et les pensions moyennes par sexe et âge, de 2004 à 2020 ;
+- les données observées de la DREES sur les durées validées pour la retraite à divers âges, par génération, à partir de l'EIC 2017 ;
+- les données et les projections démographiques de l'Insee par sexe, âge et année, sous divers scénarios démographiques ;
+- les données et les projections d'activité de l'Insee.
+
+
+```{r data}
+
+
+
+```
+# Principes généraux de la modélisation
+
+La maquette est agrégée, mais s'appuie sur une désagrégation par sexe x âge x année pour les pensions de retraite. La modélisation se fait de la façon suivante :
+
+1) les durées validées pour la retraite à chaque âge au fil des générations sont observées jusqu'en 2017 (données EIC), puis projetées à partir des projections de taux d'activité, sur la base d'un modèle expliquant les durées validées (EIC) à partir des taux d'activité (projections Insee) ;
+2) les taux de retraités à chaque âge sont observés jusqu'en 2020 (modèle ANCETRE), puis projetés sur la base d'un modèle expliquant ces taux de retraités par les durées validées par génération avant 55 ans (issus de l'étape 1) et des indicatrices des positions par rapport aux âges légaux ;
+3) les montants de retraite par sexe x âge x année sont eux aussi observés jusqu'en 2020 avec le modèle ANCETRE, puis projetés en fonction des durées validées et des indicatrices de position par rapport aux âges légaux ;
+4) les taux d'activité sont directement tirés des projections des l'Insee, sauf après 55/60 ans, où on les modélise sur la base des mêmes variables explicatives que les taux de retraités/ou bien : sur la base des taux de retraités ?? ;
+[+ modéliser les taux de cotis[EIC] après 55 ans en fonction des taux de retraités, eux-mêmes déterminés par les paramètre AOD/durée ?]
+5) les salaires moyens, taux de prélèvement, et ratio correcteur pour passer des droits directs aux masses de dépenses de retraite sont directement tirés des projections du COR ;
+6) les projections sont réalisées en écart aux scénarios projetés par le COR, par simple règle de trois.
+[intégrer dans la maquette l'invalidité/les minima sociaux, calibrés sur DREES ?]
+
+# Paramétrisation des modèles
+
+## Durées validées en fonction des taux d'activité
+
+```{r dureesval_txact}
+
+# == récupération des données
+
+```
+
+
+## Taux de retraités en fonction des durées validées
+
+
+## Montant de pension en fonction des durées validées
+
+
+
+
+## Taux d'activité après 60 ans, en fonction des durées validées
+
+
+
 
 
 

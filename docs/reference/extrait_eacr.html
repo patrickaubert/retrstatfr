@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • retrstatfr</title>
+<title>Extrait les données opendata de l'enquête annuelle auprès des caisses de retraite — extrait_eacr • retrstatfr</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,8 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Extrait les données opendata de l'enquête annuelle auprès des caisses de retraite — extrait_eacr" />
+<meta property="og:description" content="Si l'adresse du fichier n'est pas indiquée, la fonction lit par défaut la dernière version des données disponibles sur l'espace data.Drees (version diffusée le 10 octobre 2022)." />
 
 
 
@@ -58,7 +59,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -106,135 +107,42 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Extrait les données opendata de l'enquête annuelle auprès des caisses de retraite</h1>
+    
+    <div class="hidden name"><code>extrait_eacr.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>Si l'adresse du fichier n'est pas indiquée, la fonction lit par défaut la dernière version des données disponibles sur l'espace data.Drees (version diffusée le 10 octobre 2022).</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>extrait_eacr</span><span class='op'>(</span>
+ 
+    fichier <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"https://data.drees.solidarites-sante.gouv.fr/api/datasets/1.0/donnes_eacr/attachments/eacr_diffusee_part_2_version_du_20_septembre_2022_xlsx/"</span>,
+    <span class='st'>"https://data.drees.solidarites-sante.gouv.fr/api/datasets/1.0/donnes_eacr/attachments/eacr_diffusee_part_1_version_du_20_septembre_2022_xlsx/"</span><span class='op'>)</span>,
+  tableaux <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-principales-fonctions" class="hasAnchor"><a href="#section-principales-fonctions" class="anchor"></a>Principales fonctions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      
-    </tbody><tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-fonctions-auxiliaires" class="hasAnchor"><a href="#section-fonctions-auxiliaires" class="anchor"></a>Fonctions auxiliaires</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="extrait_opendata.html">extrait_opendata()</a></code> </p>
-        </td>
-        <td><p>Extrait des données diffusées en open data</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="extrait_eacr.html">extrait_eacr()</a></code> </p>
-        </td>
-        <td><p>Extrait les données opendata de l'enquête annuelle auprès des caisses de retraite</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="recode_modalites_eir.html">recode_modalites_eir()</a></code> </p>
-        </td>
-        <td><p>Recode une variable de l'EIR en remplaçant ses modalités par leurs intitulés</p></td>
-      </tr>
-    </tbody><tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-jeux-de-donn-es" class="hasAnchor"><a href="#section-jeux-de-donn-es" class="anchor"></a>Jeux de données</h2>
-          <p class="section-desc"><p>Données utiles diffusées en open data par la DREES, le COR, ou
-autres</p></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="projcor.html">projcor</a></code> </p>
-        </td>
-        <td><p>Projections du conseil d'orientation des retraites (COR)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="indicconj.html">indicconj</a></code> </p>
-        </td>
-        <td><p>Indicateurs conjoncturels de suivi des retraites en France</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="txretr.html">txretr</a></code> </p>
-        </td>
-        <td><p>Taux de retraités par âge fin entre 50 et 70 ans (source DREES, modèle ANCETRE)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="sources_opendata.html">sources_opendata</a></code> </p>
-        </td>
-        <td><p>Une table contenant les informations permettant d'extraire des données sur la retraite diffusées en open data</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="docs_cor.html">docs_cor</a></code> </p>
-        </td>
-        <td><p>Table des documents diffusés dans le cadre des séances mensuelles du COR</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="seances_cor.html">seances_cor</a></code> </p>
-        </td>
-        <td><p>Index des titres et dates des séances mensuelles du COR</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="dossiers_en_bref_cor.html">dossiers_en_bref_cor</a></code> </p>
-        </td>
-        <td><p>Une base des questions/réponses extraites des documents "Le dossier en bref" du COR</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="variables_eir.html">variables_eir</a></code> </p>
-        </td>
-        <td><p>Une table des variables de l'EIR et de leurs modalités</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="modalites_eir.html">modalites_eir</a></code> </p>
-        </td>
-        <td><p>Une table des modalités des variables de l'EIR</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>fichier</th>
+      <td><p>emplacement du fichier Excel contenant les données</p></td>
+    </tr>
+    <tr>
+      <th>tableaux</th>
+      <td><p>nom des tableaux (onglets du fichier Excel)</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>une liste de data.frame</p>
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>

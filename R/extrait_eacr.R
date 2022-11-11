@@ -10,9 +10,7 @@
 #' @importFrom janitor clean_names
 #'
 #' @return une liste de data.frame
-#' @export
-#'
-#' @examples
+#' @export extrait_eacr
 extrait_eacr <- function(fichier=c("https://data.drees.solidarites-sante.gouv.fr/api/datasets/1.0/donnes_eacr/attachments/eacr_diffusee_part_2_version_du_20_septembre_2022_xlsx/",
                                 "https://data.drees.solidarites-sante.gouv.fr/api/datasets/1.0/donnes_eacr/attachments/eacr_diffusee_part_1_version_du_20_septembre_2022_xlsx/"),
                          tableaux=NULL) {

@@ -12,6 +12,8 @@ reference:
 - title: Fonctions auxiliaires
 - contents:
   - extrait_opendata
+  - extrait_eacr
+  - recode_modalites_eir
 - title: Jeux de données
   desc: Données utiles diffusées en open data par la DREES, le COR, ou autres
 - contents:
@@ -22,6 +24,8 @@ reference:
   - docs_cor
   - seances_cor
   - dossiers_en_bref_cor
+  - variables_eir
+  - modalites_eir
 navbar:
  right:
     - icon: fa-github fa-lg

@@ -2,6 +2,7 @@
 
 export(extrait_eacr)
 export(extrait_opendata)
+export(recode_modalites_eir)
 importFrom(cellranger,as.cell_limits)
 importFrom(dplyr,recode)
 importFrom(janitor,clean_names)

@@ -152,3 +152,34 @@
 #'   \item{titre.seance}{Titre de la séance}
 #' }
 "dossiers_en_bref_cor"
+
+#' Une table des variables de l'EIR et de leurs modalités
+#'
+#' Données récupérées sur le site du CASD.
+#'
+#' Voir aussi la table 'modalites_eir'.
+#'
+#' @format A data frame with 582 observations and 7 variables:
+#' \describe{
+#'   \item{variable}{Nom de la variable}
+#'   \item{libelle}{Libellé de la variable}
+#'   \item{modalites}{Liste des modalités de la variable (séparées par un ;)}
+#'   \item{table}{Table dans laquelle la variable est disponible (avant, ddir, etc.)}
+#' }
+"variables_eir"
+
+#' Une table des modalités des variables de l'EIR
+#'
+#' La table contient une ligne par modalité de chaque variable (une variable apparaît donc autant de fois qu'elle a de modalités distinctes),
+#' contrairement à la table 'variables_eir', qui contient une ligne par variable.
+#'
+#' Données récupérées sur le site du CASD.
+#'
+#' @format A data frame with 582 observations and 7 variables:
+#' \describe{
+#'   \item{table}{Table dans laquelle la variable est disponible (avant, ddir, etc.)}
+#'   \item{variable}{Nom de la variable}
+#'   \item{modalite}{Valeur de chaque modalité de la variable (séparées par un ;)}
+#'   \item{modalite}{Libellé en clair de la modalité}
+#' }
+"modalites_eir"
