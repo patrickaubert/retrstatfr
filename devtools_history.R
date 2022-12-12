@@ -20,3 +20,5 @@ usethis::use_pkgdown()
 pkgdown::build_site()
 #usethis::use_pkgdown_github_pages()
 
+# == 11/11/2022 : ajout des modalités des variables de l'EIR
+
