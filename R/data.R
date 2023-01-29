@@ -218,7 +218,7 @@
 #' ne retenir que les années d'observations les plus récentes (afin d'avoir des observations homogènes
 #' sans rupture de série).
 #'
-#' @format Un data frame avec 12548 observations et 8 variables:
+#' @format Un data frame avec 15932 observations et 8 variables:
 #' \describe{
 #'   \item{cc}{Code caisse, selon la nomenclature utilisée par la DREES pour l'EACR en open data}
 #'   \item{caisse}{Intitulé de la caisse de retraite}
