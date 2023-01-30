@@ -5,7 +5,7 @@
 \alias{ageretr}
 \title{Une table avec des séries chronologiques d'âges moyens de départ à la retraite}
 \format{
-Un data frame avec 15932 observations et 8 variables:
+Un data frame avec 15702 observations et 8 variables:
 \describe{
 \item{cc}{Code caisse, selon la nomenclature utilisée par la DREES pour l'EACR en open data}
 \item{caisse}{Intitulé de la caisse de retraite}
