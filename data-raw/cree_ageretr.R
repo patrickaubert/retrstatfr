@@ -99,9 +99,11 @@ ageretr_67 <- agetabc %>% filter(age==67) %>%
               filter(age>=67) %>%
               group_by(caisse,cc,sexe,naiss,generation) %>%
               # méthode 1 = on retient l'écart observé à l'âge le plus bas observé
-              filter(age==min(age)) %>%
+              #filter(age==min(age)) %>%
               # méthode 2 = on retient l'écart moyen sur toutes les années observées
               # summarise(varageliq_g_p1 = mean(varageliq_g_p1)) %>%
+              # méthode 3 = on retient l'écart median sur toutes les années observées
+              summarise(varageliq_g_p1 = quantile(varageliq_g_p1,0.5)) %>%
               ungroup() %>%
               select(caisse,cc,sexe,naiss,generation,varageliq_g_p1),
             by=c("caisse","cc","sexe","naiss","generation") ) %>%
@@ -124,7 +126,12 @@ ageretr_70 <- agetabc %>% filter(age==70) %>%
   full_join(vargen %>%
               filter(age>=70) %>%
               group_by(caisse,cc,sexe,naiss,generation) %>%
-              filter(age==min(age)) %>%
+              # méthode 1 = on retient l'écart observé à l'âge le plus bas observé
+              #filter(age==min(age)) %>%
+              # méthode 2 = on retient l'écart moyen sur toutes les années observées
+              # summarise(varageliq_g_p1 = mean(varageliq_g_p1)) %>%
+              # méthode 3 = on retient l'écart median sur toutes les années observées
+              summarise(varageliq_g_p1 = quantile(varageliq_g_p1,0.5)) %>%
               ungroup() %>%
               select(caisse,cc,sexe,naiss,generation,varageliq_g_p1),
             by=c("caisse","cc","sexe","naiss","generation") ) %>%
@@ -149,7 +156,7 @@ ageretr <- bind_rows(
 
 # tests
 
-# ageretr %>% filter(cc=="5600" & naiss=="Ensemble") %>% ggplot(aes(y=ageliq,x=generation,colour=sexe,linetype=champ_obs,group=paste(sexe,champ_obs))) + geom_line() + labs(title="Âge moyen de départ à la retraite",caption = "Champ : retraités, nés en France.\nSource : DREES, EACR.")
+# ageretr %>% filter(cc=="0010" & naiss=="France") %>% ggplot(aes(y=ageliq,x=generation,colour=sexe,linetype=champ_obs,group=paste(sexe,champ_obs))) + geom_line() + labs(title="Âge moyen de départ à la retraite",caption = "Champ : retraités, nés en France.\nSource : DREES, EACR.")
 # ageretr %>% filter(cc=="0012" & naiss=="Ensemble") %>% ggplot(aes(y=ageliq,x=generation,colour=sexe,linetype=champ_obs,group=paste(sexe,champ_obs))) + geom_line() + labs(title="Âge moyen de départ à la retraite",caption = "Champ : retraités, tous lieux de naissance.\nSource : DREES, EACR.")
 
 # tabc %>% filter(cc=="5600" & naiss=="Ensemble") %>% ggplot(aes(y=ageliq,x=generation,colour=age,group=age)) + geom_line() + facet_grid(~sexe) + labs(title="Âge moyen de départ à la retraite, selon l'âge d'observation",caption = "Champ : nés en France.\nSource : DREES, EACR.")
@@ -159,7 +166,7 @@ ageretr <- bind_rows(
 
 # ageretr %>% filter(cc %in% c("0010","0015") & naiss=="Ensemble" & champ_obs=="Retraités à 67 ans") %>% ggplot(aes(y=ageliq,x=generation,colour=sexe,linetype=cc,group=paste(sexe,cc))) + geom_line() + labs(title="Âge moyen de départ à la retraite",caption = "Champ : retraités, nés en France.\nSource : DREES, EACR.")
 # ageretr %>% filter(cc %in% c("6000","5600") & naiss=="Ensemble" & champ_obs=="Retraités à 67 ans") %>% ggplot(aes(y=ageliq,x=generation,colour=sexe,linetype=cc,group=paste(sexe,cc))) + geom_line() + labs(title="Âge moyen de départ à la retraite",caption = "Champ : retraités, nés en France.\nSource : DREES, EACR.")
-# ageretr %>% filter(cc %in% c("0010","0015","0040","0050") & naiss=="Ensemble" & champ_obs=="Retraités à 67 ans") %>% ggplot(aes(y=ageliq,x=generation,colour=sexe,linetype=cc,group=paste(sexe,cc))) + geom_line() + facet_grid(~sexe) + labs(title="Âge moyen de départ à la retraite",caption = "Champ : retraités, nés en France.\nSource : DREES, EACR.")
+# ageretr %>% filter(cc %in% c("0010","0015","0042") & naiss=="Ensemble" & champ_obs=="Retraités à 67 ans") %>% ggplot(aes(y=ageliq,x=generation,colour=sexe,linetype=cc,group=paste(sexe,cc))) + geom_line() + facet_grid(~sexe) + labs(title="Âge moyen de départ à la retraite",caption = "Champ : retraités, nés en France.\nSource : DREES, EACR.")
 
 
 # ageretr %>% filter(naiss=="Ensemble") %>% ggplot(aes(y=ageliq,x=generation,colour=sexe,linetype=champ_obs,group=paste(sexe,champ_obs))) + geom_line() + facet_wrap(~caisse,scales="free") + labs(title="Âge moyen de départ à la retraite",caption = "Champ : nés en France.\nSource : DREES, EACR.")
