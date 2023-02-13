@@ -218,7 +218,12 @@
 #' ne retenir que les années d'observations les plus récentes (afin d'avoir des observations homogènes
 #' sans rupture de série).
 #'
-#' @format Un data frame avec 15702 observations et 8 variables:
+#' Certains agrégats ont été reconstruits (fonction publique civile, indépendants hors libéraux, régimes spéciaux) en
+#' faisant l'hypothèse qu'il n'y a pas de polyaffiliation entre les retraités des régimes au sein de chaque groupe (par exemple,
+#' entre le fait d'être artisan, commerçant ou non-salarié agricole). Sous cette hypothèse, les moyennes au sein
+#' de chaque agrégat correspondent aux moyennes des âges de départ dans chaque régime pondérées par les effectifs de retraités.
+#'
+#' @format Un data frame avec 17986 observations et 8 variables:
 #' \describe{
 #'   \item{cc}{Code caisse, selon la nomenclature utilisée par la DREES pour l'EACR en open data}
 #'   \item{caisse}{Intitulé de la caisse de retraite}
