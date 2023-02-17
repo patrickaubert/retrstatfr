@@ -22,3 +22,7 @@ pkgdown::build_site()
 
 # == 11/11/2022 : ajout des modalités des variables de l'EIR
 
+# == 13/02/2023 : ajout de la table 'ageretr' (à partir des données opendata EACR)
+
+# == 17/02/2023 : (EN COURS) ajout de la table 'indicgen' (à partir des données opendata EACR)
+
