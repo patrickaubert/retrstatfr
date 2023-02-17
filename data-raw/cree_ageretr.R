@@ -154,7 +154,7 @@ ageretr_67 <- agetabc %>% filter(age==67) %>%
               select(caisse,cc,sexe,naiss,generation,varageliq_g_p1),
             by=c("caisse","cc","sexe","naiss","generation") ) %>%
   arrange(caisse,cc,sexe,naiss,-generation) %>%
-  # on estime l'âge moyen de liquidation parmi les retraités observés à 67 ans en chaînant les évolutions d'une année sur l'autre, observées à l'âge le plus petit disponible, par rapport à la génération la plus ancienne observée à 67 ans dans l'EACR
+  # on estime l'âge moyen de liquidation parmi les retraités observés à 67 ans en chaînant les évolutions d'une année sur l'autre
   mutate(varageliq_g_p1 = ifelse(is.na(varageliq_g_p1),1,varageliq_g_p1),
          varageliq_g_p1 = ifelse(!is.na(age),1,varageliq_g_p1),
          source = ifelse(is.na(source),"chaînage rétrospectif",source)) %>%

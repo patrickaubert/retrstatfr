@@ -235,3 +235,26 @@
 #'   \item{ageliq}{Âge moyen de liquidation sur le champ considéré}
 #' }
 "ageretr"
+
+#' Une table avec des séries chronologiques pour divers indicateurs de retraite par génération
+#'
+#' La table contient des séries chronologiques pour divers indicateurs de retraite
+#' par génération, sexe, régime, lieu de naissance. Les données sont extraites de l'EACR.
+#'
+#' Les indicateurs sont calculés pour les retraités en vie et ayant déjà liquidé un droit à un âge donné (67 ou 70 ans).
+#' Pour les générations qui ne sont pas observées à ces âges-là dans l'EACR, on a chaîné les évolutions de génération en génération à âge donné,
+#' de façon à la recaler sur la génération la plus ancienne observée à l'âge considéré.
+#'
+#' @format Un data frame avec 46128 observations et 9 variables:
+#' \describe{
+#'   \item{cc}{Code caisse, selon la nomenclature utilisée par la DREES pour l'EACR en open data}
+#'   \item{caisse}{Intitulé de la caisse de retraite}
+#'   \item{source}{Source pour chaque valeur : EACR ou 'chaînage historique'}
+#'   \item{sexe}{Sexe}
+#'   \item{naiss}{Lieu de naissance : France, Etranger ou Ensemble}
+#'   \item{generation}{Année de naissance}
+#'   \item{champ_obs}{Champ des retraités observés à 67 ou 70 ans}
+#'   \item{indicateur}{Nom de l'indicateur}
+#'   \item{valeur}{Valeur de l'indicateur}
+#' }
+"indicgen"
