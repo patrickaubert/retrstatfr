@@ -33,8 +33,8 @@ tabseacr <- extrait_eacr(c(eacr1,eacr2),c("C-","H-") )
 
 tabc <- tabseacr[["C_Droits_directs"]]  %>%
   filter(champ=="ddir" & liq=="Ensemble" & statut_sncf=="Ensemble" & age >= 67) %>%
-  # pour l'AGIRC et l'ARRCO, on supprime les observations des EACR 2008 et 2009, pour éviter le doublon avec l'EACR "rétrospective historique" de 2009
-  filter(!(cc %in% c("5000","6000") & source %in% c("EACR 2008","EACR 2009") )) %>%
+  # pour l'AGIRC et l'ARRCO, on supprime les observations des EACR 2007 à 2009, pour éviter le doublon avec l'EACR "rétrospective historique" de 2009
+  filter(!(cc %in% c("5000","6000") & source %in% c("EACR 2007","EACR 2008","EACR 2009") )) %>%
   # de même, pour l'IRCANTEC on supprime l'observation de l'EACR 2008 (doublon avec EACR_HISTO de 2009)
   filter(!(cc %in% c("1000") & source %in% c("EACR 2008") )) %>%
   # on supprime la catégorie d'âge maximale (variable selon les années) car il s'agit en réalité d'un regroupement de toutes les générations plus âgées
@@ -42,7 +42,8 @@ tabc <- tabseacr[["C_Droits_directs"]]  %>%
   select(annee,caisse,cc,source,sexe,naiss, age,effectifs,eqcc,m1) %>%
   mutate(generation=annee-age) %>%
   # on crée les variables d'intérêt
-  mutate(coefprorat = eqcc/effectifs) %>%
+  mutate(coefprorat = eqcc/effectifs,
+         m1eqcc = ifelse(!is.na(coefprorat) & coefprorat>0,m1/coefprorat,NA)) %>%
   arrange(cc,sexe,naiss,age,generation)
 
 # -- données de la table H
@@ -51,13 +52,64 @@ tabh <- tabseacr[["H_Conditions_liq"]]  %>%
   filter(grepl("^[[:digit:]]{2}$",age)) %>%
   mutate(age = as.numeric(age)) %>%
   filter(age >= 67)  %>%
+  # on supprime la part de décès dans l'année, qui n'a pas de sens en tant qu'indicateur générationnel
+  filter(!(type %in% c("deces_anc_retraites"))) %>%
   # on supprime la catégorie d'âge maximale (variable selon les années) car il s'agit en réalité d'un regroupement de toutes les générations plus âgées
   group_by(annee,sexe,cc) %>% filter(age < max(age)) %>% ungroup() %>%
   # on ajoute les effectifs totaux pour pouvoir calculer des parts
-  left_join(tabc %>% filter(naiss=="Ensemble") %>% select(annee,source,cc,caisse,sexe,age,effectifs) %>% rename(effectifstot=effectifs),
-            by=c("annee","source","cc","caisse","sexe","age") ) %>%
+  left_join(tabc %>% filter(naiss=="Ensemble") %>% select(annee,cc,caisse,sexe,age,effectifs) %>% rename(effectifstot=effectifs),
+            by=c("annee","cc","caisse","sexe","age") ) %>%
   mutate(part = effectifs/effectifstot) %>% select(-effectifs, -effectifstot) %>%
-  mutate(generation=annee-age)
+  mutate(generation=annee-age) %>%
+  # on renomme certaines modalités
+  mutate(type = recode(type,"taux_plein_duree" = "taux_plein_duree_strict"))
+
+# -- suppression des valeurs avant ruptures de série (après analyse graphique des ruptures apparentes)
+
+tabh <- tabh %>%
+  # taux de décote à l'AGIRC-ARRCO : rupture entre 2019 et 2020
+  filter(!(cc=="5600" & grepl("decote",type) & annee<=2019)) %>%
+  # CNAV : pensions par type de départ : rupture de série entre 2010 et 2011
+  mutate(m1 = ifelse(cc=="0010" & annee==2010, NA, m1))
+
+tabc <- tabc %>%
+  # CAVIMAC : rupture de série sur les EQCC entre 2019 et 2020, mais uniquement sur les générations récentes ??? -> dans le doute on supprime
+  mutate(coefprorat = ifelse(cc=="0090",NA, coefprorat)) %>%
+  # RG : valeur bizarre du coefprorat en 2018, sauf pour les Hommes ?
+  mutate(coefprorat = ifelse(cc=="0010" & sexe!="Hommes" & annee==2018,NA, coefprorat)) %>%
+  mutate(coefprorat = ifelse(cc=="0015" & sexe!="Hommes" & naiss!="France" & annee==2020,NA, coefprorat)) %>%
+  # CNIEG : rupture de série sur eqcc entre 2017 et 2018 (surtout pour les femmes)
+  mutate(coefprorat = ifelse(cc=="0100" & annee<2018,NA, coefprorat))
+
+# -- création de nouveaux indicateurs par agrégats de parts
+
+agr_type <- function(type_in,type_out) {
+  tabh %>%
+    filter(type %in% c(type_in) ) %>%
+    mutate(type = type_out) %>%
+    group_by(annee,source,cc,caisse,sexe,type,age,generation) %>%
+    summarise(m1 = weighted.mean(m1,w=part),
+              part = sum(part),
+              nb = n() ) %>%
+    #filter(nb == NROW(type_in)) %>%
+    ungroup() %>%
+    select(-nb)
+}
+
+tabh <- bind_rows(
+  # indicateurs déjà présents dans la base
+  tabh,
+  # invalides (catégories 1+2+3)
+  agr_type(c("ex_inval1","ex_inval23"),"ex_inval"),
+  # invalides et inaptes
+  agr_type(c("ex_inval1","ex_inval23","inaptes"),"ex_inval_et_inaptes"),
+  # ensemble des dispositifs au titre de l'incapacité, du handicap ou de la pénibilité
+
+  # départs au titre de la durée (yc racl et surcote)
+  agr_type(c("taux_plein_duree_strict","liq_racl","surcote"),"taux_plein_duree_yc_racl_surcote") %>%
+    filter(cc %in% c("0022") & annee>=2020),
+)
+
 
 # -- ajout de certains groupes de régimes (en supposant que l'affiliation à un régime au sein de chaque groupe est exclusive)
 
@@ -93,8 +145,12 @@ tab <- tab %>%
   filter(!grepl("^m1",indicateur) | !is.na(revalo2022)) %>%
   # on exprime les pensions revalorisées à la date de fin 2022
   mutate(valeur = ifelse(grepl("^m1",indicateur), valeur*revalo2022,valeur),
-         indicateur = indicateur %>% str_replace("^m1","pension revalorisée 2022")) %>%
+         indicateur = indicateur %>% str_replace("^m1","pension revalorisée 2022 ")) %>%
   select(-revalo2022)
+
+# -- correction des ruptures de séries manifestes (par suppression des années avant la dernière rupture)
+
+# A FAIRE
 
 # -- écart (en %) par rapport à la génération née 1 an plus tard, à âge donné
 
