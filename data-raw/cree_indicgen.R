@@ -6,14 +6,12 @@ library(tidyverse)
 
 # A FAIRE !
 
-# renommer taux_plein_duree en taux_plein_duree_strict
-# créer agrégat : invalides (1+23), taux plein durée (=tx plein durée strict + racl + surcote)
 # vérifier ruptures de séries diverses
 # supprimer croisements avec aucune donnée
 # supprimer certaines pensions moyenne par sous groupe ?
-# créer pension EQCC
 # mettre noms courts pour "indicateur" + créer variable "intitulé"
-
+# signaler pb à Agnès : pour décote 0032 (Femmes et Ensemble) : valeurs 2020 = celles de 2021 !! (idem divers motifs de liq)
+# part décote : AGIRC-ARRCO pas cohérente avec RG ?
 
 # ===================================================================================
 # crée la base "indicgen" dans le package, qui rassemble des indicateurs par génération
@@ -70,7 +68,9 @@ tabh <- tabh %>%
   # taux de décote à l'AGIRC-ARRCO : rupture entre 2019 et 2020
   filter(!(cc=="5600" & grepl("decote",type) & annee<=2019)) %>%
   # CNAV : pensions par type de départ : rupture de série entre 2010 et 2011
-  mutate(m1 = ifelse(cc=="0010" & annee==2010, NA, m1))
+  mutate(m1 = ifelse(cc=="0010" & annee==2010, NA, m1)) %>%
+  # CNAV : année 2017 atypique pour la part de décote
+  mutate(part = ifelse(cc=="0010" & type=="decote" & annee==2017,NA, part))
 
 tabc <- tabc %>%
   # CAVIMAC : rupture de série sur les EQCC entre 2019 et 2020, mais uniquement sur les générations récentes ??? -> dans le doute on supprime
@@ -107,7 +107,7 @@ tabh <- bind_rows(
 
   # départs au titre de la durée (yc racl et surcote)
   agr_type(c("taux_plein_duree_strict","liq_racl","surcote"),"taux_plein_duree_yc_racl_surcote") %>%
-    filter(cc %in% c("0022") & annee>=2020),
+    filter(cc %in% c("0022","0015") & annee>=2020),
 )
 
 
@@ -120,7 +120,7 @@ tabh <- bind_rows(
 tab <- bind_rows(
   tabc %>%
     select(-effectifs,-eqcc) %>%
-    pivot_longer(cols=c("coefprorat","m1"),names_to="indicateur",values_to="valeur") %>%
+    pivot_longer(cols=c("coefprorat","m1","m1eqcc"),names_to="indicateur",values_to="valeur") %>%
     filter(!is.na(valeur)),
   tabh %>%
     pivot_longer(cols=c("part","m1"),names_to="indicateur",values_to="valeur") %>%
