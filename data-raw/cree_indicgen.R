@@ -11,7 +11,8 @@ library(tidyverse)
 # supprimer certaines pensions moyenne par sous groupe ?
 # mettre noms courts pour "indicateur" + créer variable "intitulé"
 # signaler pb à Agnès : pour décote 0032 (Femmes et Ensemble) : valeurs 2020 = celles de 2021 !! (idem divers motifs de liq)
-# part décote : AGIRC-ARRCO pas cohérente avec RG ?
+# signaler pb : coefprorat femmes CNAV ??
+# part décote : AGIRC-ARRCO pas cohérente avec RG ? -> regarder autres incohérences du même type
 
 # ===================================================================================
 # crée la base "indicgen" dans le package, qui rassemble des indicateurs par génération
