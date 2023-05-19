@@ -3,6 +3,7 @@ load_all()
 
 library(tidyverse)
 # library(openxlsx)
+library(broom)
 
 # A FAIRE !
 
@@ -21,8 +22,8 @@ library(tidyverse)
 # ==== extraction de données de l'EACR
 
 repeacr <- "C:/Users/PA/Documents/bases_de_donnees/EACR/brut/"
-eacr1 <- paste0(repeacr,"EACR diffusée Part 1 - version du 24 novembre 2022.xlsx")
-eacr2 <- paste0(repeacr,"EACR diffusée Part 2 - version du 24 novembre 2022.xlsx")
+eacr1 <- paste0(repeacr,"EACR diffusée Part 1 - version du 20 février 2023.xlsx")
+eacr2 <- paste0(repeacr,"EACR diffusée Part 2 - version du 20 février 2023.xlsx")
 
 tabseacr <- extrait_eacr(c(eacr1,eacr2),c("C-","H-") )
 
@@ -149,10 +150,6 @@ tab <- tab %>%
          indicateur = indicateur %>% str_replace("^m1","pension revalorisée 2022 ")) %>%
   select(-revalo2022)
 
-# -- correction des ruptures de séries manifestes (par suppression des années avant la dernière rupture)
-
-# A FAIRE
-
 # -- écart (en %) par rapport à la génération née 1 an plus tard, à âge donné
 
 vargen <- tab %>% select(-annee,-source) %>%
@@ -162,6 +159,73 @@ vargen <- tab %>% select(-annee,-source) %>%
             by=c("caisse","cc","sexe","naiss","age","generation","indicateur")) %>%
   mutate(var_g_p1=valeur/valeur_g_p1) %>%
   filter(!is.na(var_g_p1))
+
+# -- décomposition des variations en effets génération et effets année, pour la détection des ruptures de série
+
+effets <- vargen %>%
+  mutate(lvar = log(var_g_p1),
+         annee = factor(generation+age),
+         generation = factor(generation)) %>%
+  filter(!is.na(lvar)) %>%
+  group_by(cc,sexe,naiss,indicateur) %>%
+  filter( NROW(unique(annee))>1 & NROW(unique(generation))>1 )  %>%
+  ungroup() %>%
+  nest_by(cc,sexe,naiss,indicateur) %>%
+  mutate(model = list(lm(lvar ~ 0 + annee + generation, data=data) ) )
+
+coeff_effets <- effets %>% summarise(tidy(model)) %>%
+  filter(grepl("[[:digit:]]$",term)) %>%
+  mutate(type = str_extract(term,"[^[:digit:]]+"),
+         valeur = str_extract(term,"[[:digit:]]+") )
+
+quantiles_effetsannee <- coeff_effets %>% filter(type=="annee" ) %>%
+  group_by(cc,naiss,sexe,indicateur) %>%
+  nest() %>%
+  mutate(
+    ret = map(data,~quantile(x=.$estimate, probs = c(0.25,0.5,0.75) )),
+    ret = invoke_map(data.frame, ret)
+  ) %>%
+  unnest(ret) %>% ungroup() %>%
+  select(-data) %>%
+  janitor::clean_names()
+
+pb_effetsannee <- coeff_effets %>%
+  filter(type=="annee" ) %>%
+  left_join(quantiles_effetsannee, by=c("cc","naiss","sexe","indicateur")) %>%
+  filter(estimate < x50-2*(x75-x25) | estimate > x50+2*(x75-x25)) %>%
+  rename(annee=valeur) %>%
+  #mutate(cat = paste(sexe,naiss)) %>% select(-sexe,-naiss) %>%
+  group_by(indicateur,naiss,cc,annee) %>%
+  summarise(nb_pb = n(),
+            cat_pb = paste(sexe,collapse="+")) %>%
+  ungroup() %>%
+  mutate(annee=as.numeric(annee))
+
+filtre_an_pb <- bind_rows(
+  pb_effetsannee #%>% filter(naiss!="France"),
+  #pb_effetsannee %>% filter(naiss=="Ensemble")  %>% mutate(naiss="France")
+) %>%
+  filter(nb_pb>=2) %>%
+  select(cc,naiss,annee)
+
+if (FALSE) {
+
+  # pour représentation graphique
+
+  reg <- "0010"
+  coeff_effets %>% filter(cc==reg & type=="annee" & indicateur=="part decote" ) %>% # & naiss=="Ensemble"
+    ggplot(aes(y=estimate,x=valeur,group=paste(sexe,naiss),linetype=naiss,colour=sexe)) +
+    geom_line() +
+    theme(legend.position="top") +
+    facet_grid( ~naiss) +
+    labs(subtitle=paste("Régime = ",reg))
+
+}
+
+# -- correction des ruptures de séries manifestes (par suppression des années avant la dernière rupture)
+
+# A FAIRE
+
 
 # -- indicateurs sur le champ des retraités observés à 67 ans
 

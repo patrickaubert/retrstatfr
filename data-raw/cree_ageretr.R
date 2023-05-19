@@ -160,7 +160,7 @@ if (FALSE) {
 
   # pour représentation graphique
 
-  reg <- "5600"
+  reg <- "0012"
   coeff_effets %>% filter(cc==reg & type=="annee" ) %>% # & naiss=="Ensemble"
     ggplot(aes(y=estimate,x=valeur,group=paste(sexe,naiss),linetype=naiss,colour=sexe)) +
     geom_line() +
