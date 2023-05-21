@@ -65,23 +65,7 @@ tabh <- tabseacr[["H_Conditions_liq"]]  %>%
   mutate(type = recode(type,"taux_plein_duree" = "taux_plein_duree_strict"))
 
 # -- suppression des valeurs avant ruptures de série (après analyse graphique des ruptures apparentes)
-
-tabh <- tabh %>%
-  # taux de décote à l'AGIRC-ARRCO : rupture entre 2019 et 2020
-  filter(!(cc=="5600" & grepl("decote",type) & annee<=2019)) %>%
-  # CNAV : pensions par type de départ : rupture de série entre 2010 et 2011
-  mutate(m1 = ifelse(cc=="0010" & annee==2010, NA, m1)) %>%
-  # CNAV : année 2017 atypique pour la part de décote
-  mutate(part = ifelse(cc=="0010" & type=="decote" & annee==2017,NA, part))
-
-tabc <- tabc %>%
-  # CAVIMAC : rupture de série sur les EQCC entre 2019 et 2020, mais uniquement sur les générations récentes ??? -> dans le doute on supprime
-  mutate(coefprorat = ifelse(cc=="0090",NA, coefprorat)) %>%
-  # RG : valeur bizarre du coefprorat en 2018, sauf pour les Hommes ?
-  mutate(coefprorat = ifelse(cc=="0010" & sexe!="Hommes" & annee==2018,NA, coefprorat)) %>%
-  mutate(coefprorat = ifelse(cc=="0015" & sexe!="Hommes" & naiss!="France" & annee==2020,NA, coefprorat)) %>%
-  # CNIEG : rupture de série sur eqcc entre 2017 et 2018 (surtout pour les femmes)
-  mutate(coefprorat = ifelse(cc=="0100" & annee<2018,NA, coefprorat))
+# (déplacé)
 
 # -- création de nouveaux indicateurs par agrégats de parts
 
@@ -116,6 +100,25 @@ tabh <- bind_rows(
 # -- ajout de certains groupes de régimes (en supposant que l'affiliation à un régime au sein de chaque groupe est exclusive)
 
 # à faire ultérieurement
+
+# -- première suppression (manuelle) des valeurs avant ruptures de série (après analyse graphique des ruptures apparentes)
+
+  tabh <- tabh %>%
+    # taux de décote à l'AGIRC-ARRCO : rupture entre 2019 et 2020
+    filter(!(cc=="5600" & grepl("decote",type) & annee<=2019)) %>%
+    # CNAV : pensions par type de départ : rupture de série entre 2010 et 2011
+    mutate(m1 = ifelse(cc=="0010" & annee==2010, NA, m1)) %>%
+    # CNAV : année 2017 atypique pour la part de décote
+    mutate(part = ifelse(cc=="0010" & type=="decote" & annee==2017,NA, part))
+
+  tabc <- tabc %>%
+    # CAVIMAC : rupture de série sur les EQCC entre 2019 et 2020, mais uniquement sur les générations récentes ??? -> dans le doute on supprime
+    mutate(coefprorat = ifelse(cc=="0090",NA, coefprorat)) %>%
+    # RG : valeur bizarre du coefprorat en 2018, sauf pour les Hommes ?
+    mutate(coefprorat = ifelse(cc=="0010" & sexe!="Hommes" & annee==2018,NA, coefprorat)) %>%
+    mutate(coefprorat = ifelse(cc=="0015" & sexe!="Hommes" & naiss!="France" & annee==2020,NA, coefprorat)) %>%
+    # CNIEG : rupture de série sur eqcc entre 2017 et 2018 (surtout pour les femmes)
+    mutate(coefprorat = ifelse(cc=="0100" & annee<2018,NA, coefprorat))
 
 # -- mise en forme avec indicateurs en lignes
 
@@ -171,7 +174,7 @@ effets <- vargen %>%
   filter( NROW(unique(annee))>1 & NROW(unique(generation))>1 )  %>%
   ungroup() %>%
   nest_by(cc,sexe,naiss,indicateur) %>%
-  mutate(model = list(lm(lvar ~ 0 + annee + generation, data=data) ) )
+  mutate(model = list(lm(lvar ~ 0 + annee + generation   , data=data) ) )
 
 coeff_effets <- effets %>% summarise(tidy(model)) %>%
   filter(grepl("[[:digit:]]$",term)) %>%
@@ -206,13 +209,13 @@ filtre_an_pb <- bind_rows(
   #pb_effetsannee %>% filter(naiss=="Ensemble")  %>% mutate(naiss="France")
 ) %>%
   filter(nb_pb>=2) %>%
-  select(cc,naiss,annee)
+  select(indicateur,cc,naiss,annee)
 
 if (FALSE) {
 
   # pour représentation graphique
 
-  reg <- "0010"
+  reg <- "5600"
   coeff_effets %>% filter(cc==reg & type=="annee" & indicateur=="part decote" ) %>% # & naiss=="Ensemble"
     ggplot(aes(y=estimate,x=valeur,group=paste(sexe,naiss),linetype=naiss,colour=sexe)) +
     geom_line() +
@@ -222,9 +225,22 @@ if (FALSE) {
 
 }
 
-# -- correction des ruptures de séries manifestes (par suppression des années avant la dernière rupture)
+# -- suppression automatique des ruptures de séries manifestes (par suppression des années avant la dernière rupture)
 
-# A FAIRE
+tab <- tab %>%
+  left_join(filtre_an_pb %>%
+              group_by(indicateur,cc,naiss) %>% summarise(an_pb_max=max(annee)) %>% ungroup(),
+            by=c("indicateur","cc","naiss")) %>%
+  filter(is.na(an_pb_max) | annee > an_pb_max ) #%>%
+  # == on conserve quelques cas traités à la mains
+  # à faire ?
+
+vargen <- vargen %>%
+  mutate(annee = generation+age) %>%
+  anti_join(filtre_an_pb, by=c("indicateur","cc","naiss","annee")) %>%
+  select(-annee) #%>%
+  #filter(!(cc %in% c("0022","0021","Indp") & generation+age<2015))  %>%
+  #filter(!(cc=="5600" & generation+age<2020))
 
 
 # -- indicateurs sur le champ des retraités observés à 67 ans
@@ -296,6 +312,93 @@ indicgen <- bind_rows(
 
 # indicgen %>% filter(cc=="0010" & naiss=="Ensemble" & indicateur=="part liq_racl") %>% ggplot(aes(y=valeur,x=generation,colour=sexe,linetype=champ_obs,group=paste(sexe,champ_obs))) + geom_line() + labs(title="Valeur de l'indicateur",caption = "Champ : retraités de droit direct.\nSource : DREES, EACR.")
 # indicgen %>% filter(cc=="0012" & naiss=="Ensemble"  & indicateur=="part liq_motif_fam") %>% ggplot(aes(y=valeur,x=generation,colour=sexe,linetype=champ_obs,group=paste(sexe,champ_obs))) + geom_line() + labs(title="Valeur de l'indicateur",caption = "Champ : retraités, tous lieux de naissance.\nSource : DREES, EACR.")
+
+# == sortie graphique pour l'analyse des résultats :
+
+if (FALSE) {
+
+  tousindics <- indicgen %>%
+    filter(valeur != 0 & !is.na(valeur)) %>%
+    select(caisse,cc,indicateur,champ_obs) %>%
+    group_by(caisse,cc,indicateur,champ_obs) %>% summarise(nbvals=n()) %>% ungroup() %>%
+    filter(champ_obs=="Retraités à 67 ans") %>%
+    arrange(indicateur,cc)
+
+  graphindic_general <- ggplot() +
+    aes(y=valeur,x=generation,colour=sexe,group=sexe) +
+    geom_line() +
+    facet_grid(~naiss) +
+    theme(legend.position="top",
+          plot.title.position="plot") +
+    labs( x=NULL,y=NULL,caption=NULL)
+
+  graphindic <- function(i,tabindics=tousindics) {
+    graphindic_general %+%
+      {indicgen %>%
+        filter(indicateur==tabindics$indicateur[i] & cc==tabindics$cc[i] & champ_obs==tabindics$champ_obs[i])} +
+      labs(title=tabindics$indicateur[i], subtitle=paste0("Régime = ",tabindics$cc[i]))
+  }
+
+  library(patchwork)
+
+  #nbgraphs <- 50 # nrow(tousindics)
+  #graph_verif <- graphindic(1)
+  #for (i in c(2:nbgraphs)) {graph_verif <- graph_verif / graphindic(i)}
+
+  #dirtempsave <- "C:/Users/PA/Downloads/"
+  #ggsave(paste0(dirtempsave,"graph_verif_indicgen.pdf"), plot = graph_verif,
+  #       width = 16, height = 8*nbgraphs, dpi = 320, units = "cm",limitsize=FALSE)
+
+    # -- un graphique par type d'indicateur
+
+  for (j in 1:NROW(unique(tousindics$indicateur))) {
+
+    indicloc <- unique(tousindics$indicateur)[j]
+
+    tabloc <- indicgen %>%
+      filter(valeur != 0 & !is.na(valeur)) %>%
+      group_by(caisse,cc,indicateur,naiss,champ_obs) %>% filter(n()>1) %>% ungroup() %>%
+      filter(champ_obs=="Retraités à 67 ans") %>%
+      filter(indicateur == indicloc)
+
+    graphsloc <- tabloc %>% distinct(cc,caisse,naiss) %>% arrange(cc,naiss)
+
+    graph_loc <- function(k) {
+      tabloc %>%
+        filter(indicateur==indicloc & cc==graphsloc$cc[k] & naiss==graphsloc$naiss[k]) %>%
+        ggplot( aes(y=valeur,x=generation,group=sexe) ) +
+        geom_line(size=1.25,colour="darkblue") +
+        geom_line(data = tab %>%
+                    filter(indicateur==indicloc & cc==graphsloc$cc[k] & naiss==graphsloc$naiss[k]),
+                  aes(group=paste(age,sexe)),
+          size=0.75,colour="gray") +
+        facet_grid(~sexe) +
+        theme(legend.position="top",  plot.title.position="plot") +
+        labs( x=NULL,y=NULL,caption=NULL,
+              title=indicloc,
+              subtitle=paste0("Régime = ",graphsloc$caisse[k]," (",graphsloc$cc[k],"). Lieu de naissance = ",graphsloc$naiss[k]))
+    }
+
+    graph_verif <- tabloc %>%
+      filter(indicateur==indicloc & naiss=="Ensemble") %>%
+      ggplot( aes(y=valeur,x=generation,group=cc,colour=cc) ) +
+      geom_line() +
+      facet_grid(~sexe) +
+      theme(legend.position="top",  plot.title.position="plot") +
+      labs( x=NULL,y=NULL,caption=NULL,
+            title=indicloc,
+            subtitle=paste0("Lieu de naissance = ",graphsloc$naiss[k]))
+
+    for (i in c(1:nrow(graphsloc))) {graph_verif <- graph_verif /  graph_loc(i)}
+
+    dirtempsave <- "C:/Users/PA/Downloads/"
+    ggsave(paste0(dirtempsave,"graph_verif_",str_replace_all(indicloc,"[^[:alnum:]]+","_"),".pdf"),
+           plot = graph_verif,
+           width = 16, height = 8*(nrow(graphsloc)+1), dpi = 320, units = "cm",limitsize=FALSE)
+
+  }
+
+}
 
 # ========= sauvegarde des tables
 
