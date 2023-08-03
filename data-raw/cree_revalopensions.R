@@ -1,5 +1,5 @@
 library(devtools)
-#load_all()
+load_all()
 library(tidyverse)
 
 # ===================================================================================
@@ -19,6 +19,9 @@ tab_rev_fp <- read.csv2("https://www.ipp.eu/wp-content/themes/ipp/baremes/regime
 names(tab_rev_fp) <- c("date","coeff")
 tab_rev_fp <- tab_rev_fp %>% mutate( date = as.Date(date , format="%Y-%m-%d"))
 
+# on complète les valeurs manquantes pour la FP
+tab_rev_fp <- bind_rows(tab_rev_rg %>% filter(date>"2022-01-01"), tab_rev_fp)
+
 tab_rev_base <- bind_rows(tab_rev_rg %>% mutate(cc="0010"), tab_rev_fp %>% mutate(cc="0012")) %>%
   arrange(cc,date) %>%
   group_by(cc) %>% mutate(indicerevalo=cumprod(coeff)) %>% ungroup() %>%
@@ -36,16 +39,34 @@ names(tab_rev_rci)[1:2] <- c("date","valeur_point_en_euros")
 tab_rev_rcia <- read.csv2("https://www.ipp.eu/wp-content/themes/ipp/baremes/regimes-de-retraites/2/pt_rc_art/pt_rc_art.csv",sep=",",header=TRUE)
 tab_rev_rcic <- read.csv2("https://www.ipp.eu/wp-content/themes/ipp/baremes/regimes-de-retraites/2/pt_rc_com/pt_rc_com.csv",sep=",",header=TRUE)
 
+# -- on complète les valeurs manquantes (à enlever quand les séries auront été actualisées dans les barèmes IPP)
+
 tab_rev_agircarrco <- data.frame(
-  date= c("2019-11-01","2021-11-01"),
-  valeur_point_en_euros=c(1.2714,1.2841)
+  date= c("2019-11-01","2021-11-01","2022-11-01"),
+  valeur_point_en_euros=c(1.2714,1.2841, 1.3498)
 )
+
+tab_rev_ircantec <- bind_rows(
+  data.frame(
+    date= c("2022-07-01","2023-01-01"),
+    valeur_du_point=c(0.51211 , 0.51621),
+    stringsAsFactors = FALSE
+  ) %>%
+    mutate(valeur_du_point= as.numeric(valeur_du_point)),
+  tab_rev_ircantec  %>%
+    mutate(valeur_du_point= as.numeric(valeur_du_point))
+)
+
 
 tab_rev_compl <- bind_rows(
 
-  # AGIRC-ARRCO après la fusion (2019)
+  # AGIRC-ARRCO après la fusion (2019) => on duplique les lignes pour les deux régimes + on crée le code caisse pour le régime fusionné
   tab_rev_agircarrco  %>%
     mutate(cc="6000"),
+  tab_rev_agircarrco  %>%
+    mutate(cc="5000"),
+  tab_rev_agircarrco  %>%
+    mutate(cc="5600"),
 
   # ARRCO jusqu'en 2019, précédé par l'UNIRS
   tab_rev_arrco %>% select(date,valeur_point_en_euros) %>%
@@ -71,19 +92,28 @@ tab_rev_compl <- bind_rows(
 # -- ensemble des régimes
 
 tab_rev <- expand.grid(
-  annee=c(1949:2022) ,
+  annee=c(1949:2023) ,
   cc=as.vector(unique(  c(tab_rev_base$cc, tab_rev_compl$cc)) ),
+  mois=c(1:12),
   stringsAsFactors = FALSE )  %>%
-  mutate(date = paste0(as.character(annee),"-12-31") %>% as.Date( format="%Y-%m-%d"))
+  #mutate(date = paste0(as.character(annee),"-",as.character(mois),"-",case_when(mois %in% c(1,3,5,7,8,10,12) ~ "31", mois==2 ~"28", TRUE ~"30" )) %>%
+  mutate(date = paste0(as.character(annee),"-",as.character(mois),"-01") %>%
+           as.Date( format="%Y-%m-%d")) %>%
+  arrange(cc,date) %>%
+  filter(date<=Sys.Date())
 
-revalopensions <- bind_rows( tab_rev, tab_rev_base, tab_rev_compl) %>%
+revalopensions <- tab_rev %>%
+  left_join(bind_rows(tab_rev_base,tab_rev_compl), by=c("cc","date")) %>%
   arrange(cc,date) %>%
   group_by(cc) %>% fill(indicerevalo,.direction="down") %>% ungroup() %>%
   mutate(annee = format(date,format="%Y") %>% as.numeric(),
          mois = format(date,format="%m") %>% as.numeric(),
          jour = format(date,format="%d") %>% as.numeric()) %>%
   relocate("annee",.after="date")  %>%
-  relocate("indicerevalo",.after="jour")
+  relocate("indicerevalo",.after="jour") %>%
+  select(-jour) %>%
+  filter(!is.na(indicerevalo))
+
 
 # == sauvegarde des bases
 

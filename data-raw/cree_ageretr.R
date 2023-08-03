@@ -316,6 +316,56 @@ ageretr <- bind_rows(
 # vargen %>% filter(cc=="6000" & naiss=="Ensemble") %>% mutate(annee=generation+age) %>% ggplot(aes(y=varageliq_g_p1,x=generation,colour=age,group=age)) + geom_line() + facet_grid(~sexe) + labs(title="Taux d'évolution de l'âge moyen de départ à la retraite, selon l'âge d'observation",caption = "Champ : nés en France.\nSource : DREES, EACR.")
 
 
+# == sortie graphique pour l'analyse des résultats
+
+if (FALSE) {
+
+    library(patchwork)
+
+    tabloc <- ageretr %>%
+      filter(champ_obs=="Retraités à 67 ans")
+
+    graphsloc <- tabloc %>% distinct(cc,caisse,naiss) %>% arrange(cc,naiss)
+
+    theme_set(theme_bw())
+
+    graph_loc <- function(k) {
+      tabloc %>%
+        filter(cc==graphsloc$cc[k] & naiss==graphsloc$naiss[k]) %>%
+        ggplot( aes(y=ageliq,x=generation,group=sexe) ) +
+        geom_line(size=1.25,colour="darkblue") +
+        geom_line(data = agetabc %>%
+                    filter(cc==graphsloc$cc[k] & naiss==graphsloc$naiss[k]),
+                  aes(group=paste(age,sexe)),
+                  size=0.25,colour="gray") +
+        facet_grid(~sexe) +
+        theme(legend.position="top",  plot.title.position="plot") +
+        labs( x=NULL,y=NULL,caption=NULL,
+              title=NULL,
+              subtitle=paste0("Régime = ",graphsloc$caisse[k]," (",graphsloc$cc[k],"). Lieu de naissance = ",graphsloc$naiss[k]))
+    }
+
+    graph_verif <- tabloc %>%
+      filter(indicateur==indicloc & naiss=="Ensemble") %>%
+      ggplot( aes(y=valeur,x=generation,group=cc,colour=cc) ) +
+      geom_line() +
+      facet_grid(~sexe) +
+      theme(legend.position="top",  plot.title.position="plot") +
+      labs( x=NULL,y=NULL,caption=NULL,
+            title=indicloc,
+            subtitle=paste0("Lieu de naissance = ",graphsloc$naiss[k]))
+
+    graph_verif <- graph_loc(1)
+    for (i in c(2:nrow(graphsloc))) {graph_verif <- graph_verif /  graph_loc(i)}
+
+    dirtempsave <- "C:/Users/PA/Downloads/"
+    ggsave(paste0(dirtempsave,"graph_verif_ageretr.pdf"),
+           plot = graph_verif,
+           width = 16, height = 8*nrow(graphsloc), dpi = 320, units = "cm",limitsize=FALSE)
+
+}
+
+
 # ========= sauvegarde des tables
 
 usethis::use_data(ageretr, overwrite=TRUE)
