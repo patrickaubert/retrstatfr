@@ -35,7 +35,6 @@ tab_rev_agirc <- read.csv2("https://www.ipp.eu/wp-content/themes/ipp/baremes/reg
 tab_rev_unirs <- read.csv2("https://www.ipp.eu/wp-content/themes/ipp/baremes/regimes-de-retraites/0/1/0/unirs/point/point.csv",sep=",",header=TRUE)
 tab_rev_ircantec <- read.csv2("https://www.ipp.eu/wp-content/themes/ipp/baremes/regimes-de-retraites/1/regimes_complementaires/ircantec/ircantec.csv",sep=",",header=TRUE)
 tab_rev_rci <- read.csv2("https://www.ipp.eu/wp-content/themes/ipp/baremes/regimes-de-retraites/2/pt_rci/pt_rci.csv",sep=",",header=TRUE)
-names(tab_rev_rci)[1:2] <- c("date","valeur_point_en_euros")
 tab_rev_rcia <- read.csv2("https://www.ipp.eu/wp-content/themes/ipp/baremes/regimes-de-retraites/2/pt_rc_art/pt_rc_art.csv",sep=",",header=TRUE)
 tab_rev_rcic <- read.csv2("https://www.ipp.eu/wp-content/themes/ipp/baremes/regimes-de-retraites/2/pt_rc_com/pt_rc_com.csv",sep=",",header=TRUE)
 
@@ -82,12 +81,30 @@ tab_rev_compl <- bind_rows(
 
   # IRCANTEC
   tab_rev_ircantec %>% select(date,valeur_du_point) %>%
-    mutate(cc="1000",valeur_point_en_euros=as.numeric(valeur_du_point))
+    mutate(cc="1000",valeur_point_en_euros=as.numeric(valeur_du_point)),
+
+  # RCI
+  tab_rev_rci %>% select(date,valeur_point_rci_date) %>%
+    mutate(cc="0043",valeur_point_en_euros=as.numeric(valeur_point_rci_date)) %>%
+    filter(!is.na(valeur_point_en_euros)),
+
+  # RCI commerçant
+  tab_rev_rci %>% select(date,valeur_point_rci_date) %>%
+    mutate(cc="0041",valeur_point_en_euros=as.numeric(valeur_point_rci_date)) %>%
+    filter(!is.na(valeur_point_en_euros)),
+  tab_rev_rcic %>% select(date,valeur_points_acquis_depuis_1973) %>%
+    mutate(cc="0041",valeur_point_en_euros=as.numeric(valeur_points_acquis_depuis_1973)) %>%
+    filter(!is.na(valeur_point_en_euros))#,
+
+  # RSI artisans (0051)
+  # (RQ : on laisse de côté ce régime pour l'instant, car la revalorisation est hétérogène est dépend de la date d'acquisition des points)
 
   ) %>%
   mutate( date = as.Date(date , format="%Y-%m-%d")) %>%
   rename(indicerevalo=valeur_point_en_euros) %>%
-  select(date,cc,indicerevalo)
+  select(date,cc,indicerevalo) %>%
+  filter(!is.na(indicerevalo)) %>%
+  arrange(cc,date)
 
 # -- ensemble des régimes
 

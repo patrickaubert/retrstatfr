@@ -5,7 +5,7 @@
 \alias{revalopensions}
 \title{Une table des indices de revalorisations des pensions dans les principaux régimes}
 \format{
-Un data frame avec 4280 observations et 5 variables:
+Un data frame avec 4641 observations et 5 variables:
 \describe{
 \item{cc}{Code caisse, selon la nomenclature utilisée par la DREES pour l'EIR et l'EACR en open data}
 \item{date}{Date (toujours au 1er de chaque mois)}
