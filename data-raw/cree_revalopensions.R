@@ -37,6 +37,7 @@ tab_rev_ircantec <- read.csv2("https://www.ipp.eu/wp-content/themes/ipp/baremes/
 tab_rev_rci <- read.csv2("https://www.ipp.eu/wp-content/themes/ipp/baremes/regimes-de-retraites/2/pt_rci/pt_rci.csv",sep=",",header=TRUE)
 tab_rev_rcia <- read.csv2("https://www.ipp.eu/wp-content/themes/ipp/baremes/regimes-de-retraites/2/pt_rc_art/pt_rc_art.csv",sep=",",header=TRUE)
 tab_rev_rcic <- read.csv2("https://www.ipp.eu/wp-content/themes/ipp/baremes/regimes-de-retraites/2/pt_rc_com/pt_rc_com.csv",sep=",",header=TRUE)
+tab_rev_rafp <- read.csv2("https://www.ipp.eu/wp-content/themes/ipp/baremes/regimes-de-retraites/1/regimes_complementaires/rafp/rafp.csv",sep=",",header=TRUE)
 
 # -- on complète les valeurs manquantes (à enlever quand les séries auront été actualisées dans les barèmes IPP)
 
@@ -56,6 +57,24 @@ tab_rev_ircantec <- bind_rows(
     mutate(valeur_du_point= as.numeric(valeur_du_point))
 )
 
+tab_rev_rafp <- bind_rows(
+  data.frame(
+    date= c("2023-01-01","2022-01-01"),
+    valeur_service_point_rafp=c(0.05036,0.04764 ),
+    valeur_acquisition_point_rafp=c(1.3466 ,1.2740),
+    stringsAsFactors = FALSE   ) ,
+  tab_rev_rafp  %>%
+    mutate(valeur_service_point_rafp= as.numeric(valeur_service_point_rafp),
+           valeur_acquisition_point_rafp= as.numeric(valeur_acquisition_point_rafp)) %>%
+    # correction d'une erreur
+    mutate(
+      valeur_acquisition_point_rafp = ifelse(
+        date=="2021-01-01",1.2502,
+        valeur_acquisition_point_rafp )
+    )
+)
+
+# -- on concatène tous les régimes complémentaires
 
 tab_rev_compl <- bind_rows(
 
@@ -82,6 +101,11 @@ tab_rev_compl <- bind_rows(
   # IRCANTEC
   tab_rev_ircantec %>% select(date,valeur_du_point) %>%
     mutate(cc="1000",valeur_point_en_euros=as.numeric(valeur_du_point)),
+
+  # RAFP
+  tab_rev_rafp %>% select(date,valeur_service_point_rafp) %>%
+    mutate(cc="3000",valeur_point_en_euros=as.numeric(valeur_service_point_rafp)) %>%
+    filter(!is.na(valeur_point_en_euros)),
 
   # RCI
   tab_rev_rci %>% select(date,valeur_point_rci_date) %>%

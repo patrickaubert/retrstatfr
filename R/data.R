@@ -192,7 +192,7 @@
 #' Les régimes sont repérés par leur code "CC", cohérent avec les données de l'EACR diffusées par la DREES en open data.
 #' Les données sont issues des barèmes IPP : https://www.ipp.eu/baremes-ipp/regimes-de-retraites/
 #'
-#' @format Un data frame avec 4641 observations et 5 variables:
+#' @format Un data frame avec 4865 observations et 5 variables:
 #' \describe{
 #'   \item{cc}{Code caisse, selon la nomenclature utilisée par la DREES pour l'EIR et l'EACR en open data}
 #'   \item{date}{Date (toujours au 1er de chaque mois)}
