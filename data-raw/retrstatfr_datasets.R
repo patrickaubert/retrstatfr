@@ -33,40 +33,50 @@ indiccor <- sources_opendata %>%
   filter(producteur=="COR",reference=="rapport annuel") %>%
   select(intitulecourt,datepubli)
 
+  # fonction pour l'extraction des projections du cor
+extrait_projcor <- function(intitule,date){
+  tab <- extrait_opendata(intitulecourt=intitule,datepubli=date) %>%
+    select(-sexe,-geo) %>%
+    filter(!is.na(valeurs)) %>%
+    rename(scenario=x1) %>%
+    mutate(scenario = recode(
+      scenario %>% tolower() %>% trimws(),
+      "observé" = "obs",
+      "observée" = "obs",
+      "observations" = "obs",
+      "projetée" = "tous scénarios",
+      "1.7999999999999999e-2"="+1,8%/an",
+      "1.4999999999999999e-2"="+1,5%/an",
+      "1.2999999999999999e-2"="+1,3%/an",
+      "1.6e-2"="+1,6%/an",
+      "7.0000000000000001e-3"="+0,7%/an",
+      "0.016"="+1,6%/an",
+      "0.013"="+1,3%/an",
+      "0.007"="+0,7%/an",
+      "0.01"="+1%/an"
+    ))
+  names(tab) <- recode(names(tab),"valeurs"=intitule)
+  return(tab)
+}
+
   # extraction de toutes les séries
-tabindics <- map2(indiccor$intitulecourt,indiccor$datepubli,
-                    function(x,y){
-                      tab <- extrait_opendata(intitulecourt=x,datepubli=y) %>%
-                        select(-sexe,-geo) %>%
-                        filter(!is.na(valeurs)) %>%
-                        rename(scenario=x1) %>%
-                        mutate(scenario = recode(
-                          scenario %>% tolower() %>% trimws(),
-                          "observé" = "obs",
-                          "observée" = "obs",
-                          "observations" = "obs",
-                          "projetée" = "tous scénarios",
-                          "1.7999999999999999e-2"="+1,8%/an",
-                          "1.4999999999999999e-2"="+1,5%/an",
-                          "1.2999999999999999e-2"="+1,3%/an",
-                          "1.6e-2"="+1,6%/an",
-                          "7.0000000000000001e-3"="+0,7%/an",
-                          "0.016"="+1,6%/an",
-                          "0.013"="+1,3%/an",
-                          "0.007"="+0,7%/an",
-                          "0.01"="+1%/an"
-                        ))
-                      names(tab) <- recode(names(tab),"valeurs"=x)
-                      return(tab)
-                      })
+#tabindics <- map2(indiccor$intitulecourt,indiccor$datepubli, extrait_projcor)
 #names(tabindics) <- indiccor
+tabindics <- list()
+for (i in c(1:nrow(indiccor))){
+  tabindics[[paste0(indiccor$intitulecourt[i],paste0(indiccor$datepubli[i]))]] <- extrait_projcor(indiccor$intitulecourt[i],paste0(indiccor$datepubli[i]))
+}
 
   # table mise en forme longue
 tablong <- do.call("bind_rows",tabindics) %>%
   # correction à la main ...
-  mutate(scenario = if_else(is.na(scenario) & !is.na(x2),x2,scenario) %>%
+  mutate(scenario = case_when(
+    !is.na(scenario) ~ scenario,
+    !is.na(x2) ~ x2,
+    !is.na(x3) ~ x3,
+    TRUE ~ scenario) %>%
            recode("Obs" = "obs")) %>%
-  select(-x2) %>%
+  select(-starts_with("x")) %>%
   # mise en forme longue
   pivot_longer(cols=-c("scenario","annee","datepubli"),names_to="serie",values_to="val") %>%
   filter(!is.na(val))
@@ -102,6 +112,8 @@ scenariosproj <- tablong %>% filter(!(scenario %in% c("obs","tous scénarios")))
   select(datepubli,scenario) %>% distinct() %>%
   rename(datepublisc=datepubli)
 
+sc_pour_dupli <- (scenariosproj %>% filter(datepublisc==min(datepubli)))$scenario
+
 tablong <- bind_rows(
   tablong %>% filter(scenario=="obs"),
   tablong %>% filter(scenario!="obs") %>%
@@ -109,8 +121,8 @@ tablong <- bind_rows(
   tablong %>% filter(scenario!="obs") %>%
     inner_join(nbseriesscunique, by=c("datepubli","serie")) %>%
     group_by(serie,datepubli,annee) %>%
-    slice(rep(1:n(),each=4) ) %>%
-    mutate(scenario = (scenariosproj %>% filter(datepublisc==min(datepubli)))$scenario ) %>%
+    slice(rep(1:n(),each=NROW(sc_pour_dupli)) ) %>%
+    mutate(scenario = sc_pour_dupli ) %>%
     ungroup()
 )
 

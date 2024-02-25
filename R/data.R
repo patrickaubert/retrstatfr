@@ -2,7 +2,7 @@
 #'
 #' Les données proviennent du site d'open data de la DREES (data.drees), du site internet du COR, etc.
 #'
-#' @format A data frame with 32 observations and 14 variables:
+#' @format A data frame with 50 observations and 14 variables:
 #' \describe{
 #'   \item{intitule}{Intitulé de l'indicateur}
 #'   \item{producteur}{Organisme producteur des données}
@@ -39,7 +39,7 @@
 #'
 #' Résultats des projections du COR, publiés dans son rapport annuel, pour les principaux indicateurs (pensions moyennes relatives, part des dépenses de retraite dans le PIB, etc.)
 #'
-#' @format Un data frame avec 491 observations et 21 variables:
+#' @format Un data frame avec 987 observations et 22 variables:
 #' \describe{
 #'   \item{scenario}{Scénario de projection : "obs" pour l'observé, "+1,x%/an" pour les projections}
 #'   \item{annee}{Année}

@@ -5,7 +5,7 @@
 \alias{projcor}
 \title{Projections du conseil d'orientation des retraites (COR)}
 \format{
-Un data frame avec 491 observations et 21 variables:
+Un data frame avec 987 observations et 22 variables:
 \describe{
 \item{scenario}{Scénario de projection : "obs" pour l'observé, "+1,x\%/an" pour les projections}
 \item{annee}{Année}

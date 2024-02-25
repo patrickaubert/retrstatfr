@@ -5,7 +5,7 @@
 \alias{sources_opendata}
 \title{Une table contenant les informations permettant d'extraire des données sur la retraite diffusées en open data}
 \format{
-A data frame with 32 observations and 14 variables:
+A data frame with 50 observations and 14 variables:
 \describe{
 \item{intitule}{Intitulé de l'indicateur}
 \item{producteur}{Organisme producteur des données}
