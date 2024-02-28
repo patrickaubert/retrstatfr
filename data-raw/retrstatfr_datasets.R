@@ -141,6 +141,8 @@ tablong <- tablong  %>%
 # verif :
 # unique(tablong$scenario )
 
+# verif <- tablong %>% count(datepubli,scenario)
+
 # part des salaires dans la VA : on duplique jusqu'à l'horizon de projection la dernière valeur indiquée (supposée constante en projection)
 if ("partsalva" %in% names(tablong)){
 tablong <- bind_rows(
@@ -171,7 +173,7 @@ scenariosproj <- tablong %>% filter(!(scenario %in% c("obs","tous scénarios")))
   select(datepubli,scenario) %>% distinct() %>%
   rename(datepublisc=datepubli)
 
-sc_pour_dupli <- (scenariosproj %>% filter(datepublisc==min(tablong$datepubli)))$scenario
+#sc_pour_dupli <- (scenariosproj %>% filter(datepublisc==min(tablong$datepubli)))$scenario
 
 tablong <- bind_rows(
   tablong %>% filter(scenario=="obs"),
@@ -222,11 +224,12 @@ if ("partressourcespibconveec" %in% names(projcor)){
       !is.na(partressourcespibconveec) ~ partressourcespibconveec,
       is.na(partressourcespibconveec) & (scenario=="obs") ~ partressourcespibconvtcc,
       #is.na(partressourcespibconveec) & (scenario!="obs") ~ partretrpib + soldeconveec,
-      TRUE ~ partressourcespibconveec),
-      soldeconveec = case_when(
-        !is.na(soldeconveec) ~ soldeconveec,
-        is.na(soldeconveec) ~ partressourcespibconveec-partretrpib
-      ))
+      TRUE ~ partressourcespibconveec)#,
+      #soldeconveec = case_when(
+      #  !is.na(soldeconveec) ~ soldeconveec,
+      #  is.na(soldeconveec) ~ partressourcespibconveec-partretrpib
+      #)
+      )
 }
 projcor <- projcor %>%
   arrange(datepubli,scenario,annee)

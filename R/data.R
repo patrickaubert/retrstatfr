@@ -2,7 +2,7 @@
 #'
 #' Les données proviennent du site d'open data de la DREES (data.drees), du site internet du COR, etc.
 #'
-#' @format A data frame with 50 observations and 14 variables:
+#' @format A data frame with 125 observations and 14 variables:
 #' \describe{
 #'   \item{intitule}{Intitulé de l'indicateur}
 #'   \item{producteur}{Organisme producteur des données}
@@ -23,7 +23,7 @@
 #'
 #' Les données proviennent du panorama annuel de la DREES "retraités et retraites", à partir du modèle ANCETRE.
 #'
-#' @format A data frame with 1071 observations and 6 variables:
+#' @format A data frame with 1134 observations and 7 variables:
 #' \describe{
 #'   \item{age}{Age, entre 50 et 70 ans}
 #'   \item{annee}{Année}
@@ -31,6 +31,7 @@
 #'   \item{txnouvretr}{Taux de nouveaux retraités au cours de l'année, en % (chiffre en 0 et 1)}
 #'   \item{sexe}{ensemble, femmes, hommes}
 #'   \item{geo}{lieu de résidence}
+#'   \item{datepubli}{édition du Panorama 'retraités et retraites' dont les données sont tirées}
 #' }
 "txretr"
 
@@ -39,7 +40,7 @@
 #'
 #' Résultats des projections du COR, publiés dans son rapport annuel, pour les principaux indicateurs (pensions moyennes relatives, part des dépenses de retraite dans le PIB, etc.)
 #'
-#' @format Un data frame avec 987 observations et 22 variables:
+#' @format Un data frame avec 2216 observations et 23 variables:
 #' \describe{
 #'   \item{scenario}{Scénario de projection : "obs" pour l'observé, "+1,x%/an" pour les projections}
 #'   \item{annee}{Année}
@@ -48,18 +49,19 @@
 #'   \item{pensmoynetterel}{Pensionne moyenne nette relative (en %)}
 #'   \item{ratiocotretr}{Rapport entre le nombre de cotisants et le nombre de retraités}
 #'   \item{ageconjretr}{Âge conjoncturel de départ à la retraite}
-#'   \item{partressourcespib}{Part des ressources du système de retraite dans le PIB (en %), observé}
 #'   \item{partressourcespibconveec}{Part des ressources du système de retraite dans le PIB (en %), convention EEC}
 #'   \item{partressourcespibconvtcc}{Part des ressources du système de retraite dans le PIB (en %), convention TCC}
 #'   \item{partressourcespubconvepr}{Part des ressources du système de retraite dans le PIB (en %), convention EPR}
-#'   \item{txprelev}{Taux de prélèvement global (en % de la masse des revenus d'activité), observé}
+#'   \item{txprelevconvtcc}{Taux de prélèvement global (en % de la masse des revenus d'activité), convention TCC}
 #'   \item{txprelevconveec}{Taux de prélèvement global (en % de la masse des revenus d'activité), convention EEC}
 #'   \item{txprelevconvepr}{Taux de prélèvement global (en % de la masse des revenus d'activité), convention EPR}
+#'   \item{soldeconvtcc}{Solde du système de retraite (en % du PIB), convention TCC}
+#'   \item{soldeconvepr}{Solde du système de retraite (en % du PIB), convention EPR}
 #'   \item{nbretr}{Nombre de retraités (en millions)}
 #'   \item{nbcotis}{Nombre de cotisants (en millions)}
 #'   \item{partsalvapa}{Part des revenus d'activité dans la valeur ajoutée}
-#'   \item{pensmoynette}{Pension moyenne nette (en euros 2019)}
-#'   \item{revactmoynet}{Revenu d'activité moyen net (en euros 2019)}
+#'   \item{pensmoynette}{Pension moyenne nette (en euros constants)}
+#'   \item{revactmoynet}{Revenu d'activité moyen net (en euros constants)}
 #'   \item{rationnivvie}{}
 #' }
 "projcor"
