@@ -14,12 +14,12 @@ usethis::use_data(sources_opendata, overwrite=TRUE)
 
 
 txretr <- extrait_opendata("txretr")
-txretr <- txretr %>% rename(txretr=valeurs) %>% mutate(txretr = txretr/100)
+txretr <- txretr %>% filter(datepubli==max(datepubli)) %>% rename(txretr=valeurs) %>% mutate(txretr = txretr/100)
 
 txnvretr <- extrait_opendata("taux de nouveaux retraités par âge")
-txnvretr <- txnvretr %>% rename(txnouvretr=valeurs,age=x1) %>% mutate(txnouvretr = txnouvretr/100)
+txnvretr <- txnvretr %>% filter(datepubli==max(datepubli)) %>% rename(txnouvretr=valeurs,age=x1) %>% mutate(txnouvretr = txnouvretr/100)
 
-txretr <- full_join(txretr,txnvretr, by=c("age","annee","sexe","geo"))
+txretr <- full_join(txretr,txnvretr, by=c("age","annee","sexe","geo","datepubli"))
 
 usethis::use_data(txretr, overwrite=TRUE)
 
@@ -38,10 +38,14 @@ list_noms_sc <- list(
   "observé" = "obs",
   "observée" = "obs",
   "observations" = "obs",
+  "Obs" = "obs",
   "projetée" = "tous scénarios",
   "1.7999999999999999e-2"="+1,8%/an",
   "1.4999999999999999e-2"="+1,5%/an",
   "1.2999999999999999e-2"="+1,3%/an",
+  "1.7999999999999999E-2"="+1,8%/an",
+  "1.4999999999999999E-2"="+1,5%/an",
+  "1.2999999999999999E-2"="+1,3%/an",
   "1.6e-2"="+1,6%/an",
   "7.0000000000000001e-3"="+0,7%/an",
   "0.02"="+2%/an",
@@ -53,7 +57,12 @@ list_noms_sc <- list(
   "a"="+1,8%/an",
   "b"="+1,5%/an",
   "c"="+1,3%/an",
-  "c'"="+1%/an"
+  "c'"="+1%/an",
+  "2%"="+2%/an",
+  "1,8%"="+1,8%/an",
+  "1,5%"="+1,5%/an",
+  "1,3%"="+1,3%/an",
+  "1%"="+1%/an"
 )
 
   # fonction pour l'extraction des projections du cor
@@ -75,34 +84,65 @@ extrait_projcor <- function(intitule,date){
 #names(tabindics) <- indiccor
 tabindics <- list()
 for (i in c(1:nrow(indiccor))){
-# for (i in c(46:53)){
+# for (i in c(56:67)){
   tabindics[[paste0(indiccor$intitulecourt[i],paste0(indiccor$datepubli[i]))]] <- extrait_projcor(indiccor$intitulecourt[i],paste0(indiccor$datepubli[i]))
 }
 
   # table mise en forme longue
 tablong <- do.call("bind_rows",tabindics) %>%
+  mutate(scenario = scenario %>%
+            str_replace("^(scénario|variante|gains de productivité annuels tendanciels de) ","") %>%
+            str_replace_all("(?<=[[:digit:]])[[:space:]](?=%)","") %>%
+            recode(!!! list_noms_sc))
+if ("x2" %in% names(tablong)){
   # correction à la main ...
-  mutate(scenario = case_when(
-    !is.na(scenario) ~ scenario,
-    !is.na(x2) ~ x2,
-    !is.na(x3) ~ x3,
-    TRUE ~ scenario) %>%
-           recode("Obs" = "obs")) %>%
+  tablong <- tablong  %>%
+    mutate(
+      x2 = x2 %>%
+        str_replace("^(scénario|variante|gains de productivité annuels tendanciels de) ","") %>%
+        str_replace_all("(?<=[[:digit:]])[[:space:]](?=%)","") %>%
+        recode(!!! list_noms_sc),
+      scenario = case_when(
+      !is.na(scenario) & !is.na(x2) & !(scenario %in% unlist(list_noms_sc)) & (x2 %in% unlist(list_noms_sc)) ~ x2,
+      !is.na(scenario) ~ scenario,
+      !is.na(x2) ~ x2,
+      TRUE ~ scenario) )
+}
+if ("x3" %in% names(tablong)){
+  tablong <- tablong  %>%
+    mutate(
+      x3 = x3 %>%
+        str_replace("^(scénario|variante|gains de productivité annuels tendanciels de) ","") %>%
+        str_replace_all("(?<=[[:digit:]])[[:space:]](?=%)","") %>%
+        recode(!!! list_noms_sc),
+      scenario = case_when(
+        !is.na(scenario) & !is.na(x3) & !(scenario %in% unlist(list_noms_sc)) & (x3 %in% unlist(list_noms_sc)) ~ x3,
+        !is.na(scenario) ~ scenario,
+        !is.na(x3) ~ x3,
+      TRUE ~ scenario) )
+}
+tablong <- tablong  %>%
+  mutate(scenario = scenario %>% recode("Obs" = "obs")) %>%
   select(-starts_with("x")) %>%
   # mise en forme longue
   pivot_longer(cols=-c("scenario","annee","datepubli"),names_to="serie",values_to="val") %>%
   filter(!is.na(val)) %>%
   # nouvelle correction à la main
   filter(!(grepl("^2015",datepubli) & grepl("convention cor",scenario))) %>%
+  filter(!(grepl("^2016",datepubli) & grepl("conv\\. cor",scenario))) %>%
   mutate(scenario = case_when(
     grepl("^2015",datepubli) ~ str_replace(scenario,"[[:space:]]*\\(convention.+$",""),
+    grepl("^2016",datepubli) ~ str_replace(scenario,"[[:space:]]*\\(conv.+$",""),
     TRUE ~ scenario   ) %>%
+      str_replace("^(scénario|variante|gains de productivité annuels tendanciels de) ","") %>%
+      str_replace_all("(?<=[[:digit:]])[[:space:]](?=%)","") %>%
       recode(!!! list_noms_sc))
 
 # verif :
 # unique(tablong$scenario )
 
 # part des salaires dans la VA : on duplique jusqu'à l'horizon de projection la dernière valeur indiquée (supposée constante en projection)
+if ("partsalva" %in% names(tablong)){
 tablong <- bind_rows(
   tablong %>% filter(serie!="partsalva" | scenario=="obs"),
   tablong %>% filter(serie=="partsalva" & scenario!="obs") %>%
@@ -115,6 +155,7 @@ tablong <- bind_rows(
     ungroup()
   ) %>%
   arrange(datepubli,serie,scenario,annee)
+}
 
   # identification des séries pour lesquelles les valeurs en projection sont identiques dans tous les scénarios
 nbseriesscunique <- (tablong %>%
@@ -139,8 +180,8 @@ tablong <- bind_rows(
   tablong %>% filter(scenario!="obs") %>%
     inner_join(nbseriesscunique, by=c("datepubli","serie")) %>%
     group_by(serie,datepubli,annee) %>%
-    slice(rep(1:n(),each=NROW(sc_pour_dupli)) ) %>%
-    mutate(scenario = sc_pour_dupli ) %>%
+    slice(rep(1:n(),each=NROW((scenariosproj %>% filter(datepublisc==datepubli[1]))$scenario)) ) %>%
+    mutate(scenario = (scenariosproj %>% filter(datepublisc==datepubli[1]))$scenario ) %>%
     ungroup()
 )
 
@@ -154,15 +195,40 @@ tablong <- bind_rows(
 
 projcor <- tablong %>%
   pivot_wider(id_cols=c("datepubli","scenario","annee"),
-              names_from="serie",values_from="val") %>%
+              names_from="serie",values_from="val")
+projcor <- projcor %>%
   mutate(txprelevconvepr = if_else(
-    is.na(txprelevconvepr) & (scenario=="obs"),txprelev,txprelevconvepr),
-    txprelevconveec = if_else(
-      is.na(txprelevconveec) & (scenario=="obs"),txprelev,txprelevconveec),
-    partressourcespibconvepr = if_else(
-      is.na(partressourcespibconvepr) & (scenario=="obs"),partressourcespib,partressourcespibconvepr),
-    partressourcespibconveec = if_else(
-      is.na(partressourcespibconveec) & (scenario=="obs"),partressourcespib,partressourcespibconveec) ) %>%
+    is.na(txprelevconvepr) & (scenario=="obs"),txprelevconvtcc,txprelevconvepr))
+if ("txprelevconveec" %in% names(projcor)){
+  projcor <- projcor %>%
+    mutate(txprelevconveec = if_else(
+      is.na(txprelevconveec) & (scenario=="obs"),txprelevconvtcc,txprelevconveec))
+}
+if ("partressourcespibconvepr" %in% names(projcor)){
+  projcor <- projcor %>%
+    mutate(partressourcespibconvepr = case_when(
+      !is.na(partressourcespibconvepr) ~ partressourcespibconvepr,
+      is.na(partressourcespibconvepr) & (scenario=="obs") ~ partressourcespibconvtcc,
+      is.na(partressourcespibconvepr) & (scenario!="obs") ~ partretrpib + soldeconvepr,
+      TRUE ~ partressourcespibconvepr),
+      soldeconvepr = case_when(
+        !is.na(soldeconvepr) ~ soldeconvepr,
+        is.na(soldeconvepr) ~ partressourcespibconvepr-partretrpib
+      ))
+}
+if ("partressourcespibconveec" %in% names(projcor)){
+  projcor <- projcor %>%
+    mutate(partressourcespibconveec = case_when(
+      !is.na(partressourcespibconveec) ~ partressourcespibconveec,
+      is.na(partressourcespibconveec) & (scenario=="obs") ~ partressourcespibconvtcc,
+      #is.na(partressourcespibconveec) & (scenario!="obs") ~ partretrpib + soldeconveec,
+      TRUE ~ partressourcespibconveec),
+      soldeconveec = case_when(
+        !is.na(soldeconveec) ~ soldeconveec,
+        is.na(soldeconveec) ~ partressourcespibconveec-partretrpib
+      ))
+}
+projcor <- projcor %>%
   arrange(datepubli,scenario,annee)
 
 usethis::use_data(projcor, overwrite=TRUE)

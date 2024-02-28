@@ -5,7 +5,7 @@
 \alias{txretr}
 \title{Taux de retraités par âge fin entre 50 et 70 ans (source DREES, modèle ANCETRE)}
 \format{
-A data frame with 1071 observations and 6 variables:
+A data frame with 1134 observations and 7 variables:
 \describe{
 \item{age}{Age, entre 50 et 70 ans}
 \item{annee}{Année}
@@ -13,6 +13,7 @@ A data frame with 1071 observations and 6 variables:
 \item{txnouvretr}{Taux de nouveaux retraités au cours de l'année, en \% (chiffre en 0 et 1)}
 \item{sexe}{ensemble, femmes, hommes}
 \item{geo}{lieu de résidence}
+\item{datepubli}{édition du Panorama 'retraités et retraites' dont les données sont tirées}
 }
 }
 \usage{
