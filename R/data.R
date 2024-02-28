@@ -40,7 +40,7 @@
 #'
 #' Résultats des projections du COR, publiés dans son rapport annuel, pour les principaux indicateurs (pensions moyennes relatives, part des dépenses de retraite dans le PIB, etc.)
 #'
-#' @format Un data frame avec 2216 observations et 23 variables:
+#' @format Un data frame avec 2160 observations et 23 variables:
 #' \describe{
 #'   \item{scenario}{Scénario de projection : "obs" pour l'observé, "+1,x%/an" pour les projections}
 #'   \item{annee}{Année}

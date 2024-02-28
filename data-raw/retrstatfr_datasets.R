@@ -200,9 +200,6 @@ tablong <- bind_rows(
 projcor <- tablong %>%
   pivot_wider(id_cols=c("datepubli","scenario","annee"),
               names_from="serie",values_from="val")
-projcor <- projcor %>%
-  mutate(txprelevconvepr = if_else(
-    is.na(txprelevconvepr) & (scenario=="obs"),txprelevconvtcc,txprelevconvepr))
 if ("txprelevconveec" %in% names(projcor)){
   projcor <- projcor %>%
     mutate(txprelevconveec = if_else(
@@ -229,6 +226,14 @@ if ("partressourcespibconvepr" %in% names(projcor)){
         is.na(soldeconvepr) ~ partressourcespibconvepr-partretrpib)
       )
 }
+if ("txprelevconvepr" %in% names(projcor)){
+  projcor <- projcor %>%
+    mutate(txprelevconvepr = case_when(
+      !is.na(txprelevconvepr) ~ txprelevconvepr,
+      is.na(txprelevconvepr) & (scenario=="obs") & !is.na(txprelevconvtcc) ~ txprelevconvtcc,
+      is.na(txprelevconvepr) & (scenario!="obs") & !is.na(txprelevconvtcc) ~ partressourcespibconvepr * (txprelevconvtcc/partressourcespibconvtcc),
+      TRUE ~ txprelevconveec))
+}
 if ("partressourcespibconveec" %in% names(projcor)){
   projcor <- projcor %>%
     mutate(partressourcespibconveec = case_when(
@@ -251,7 +256,18 @@ if ("revactmoynet" %in% names(projcor)){
     )
 }
 projcor <- projcor %>%
-  arrange(datepubli,scenario,annee)
+  arrange(datepubli,scenario,annee) %>%
+  filter(annee>=2002)
+
+# test pour détecter les séries manquantes
+if (FALSE){
+  verif <- projcor %>% filter(annee==2025 & grepl("an$",scenario) ) %>% #prise comme année de référence qui devrait être présente dans toutes les projections
+    select(-scenario,-annee) %>%
+    pivot_longer(cols=-c("datepubli"),names_to="indicateur",values_to="val") %>%
+    filter(is.na(val)) %>% distinct(datepubli,indicateur) %>%
+    mutate(absent="XXX") %>% pivot_wider(names_from="indicateur",values_from="absent")
+}
+
 
 usethis::use_data(projcor, overwrite=TRUE)
 
