@@ -1,5 +1,7 @@
 library(tidyverse)
 # library(openxlsx)
+library(devtools)
+# devtools::load_all()
 
 # ===================================================================================
 # sources open data
@@ -210,13 +212,14 @@ if ("partressourcespibconvepr" %in% names(projcor)){
   projcor <- projcor %>%
     mutate(partressourcespibconvepr = case_when(
       !is.na(partressourcespibconvepr) ~ partressourcespibconvepr,
-      is.na(partressourcespibconvepr) & (scenario=="obs") ~ partressourcespibconvtcc,
+      is.na(partressourcespibconvepr) & (scenario=="obs") & !is.na(partressourcespibconvtcc) ~ partressourcespibconvtcc,
+      is.na(partressourcespibconvepr) & (scenario=="obs") & !is.na(partressourcespibconveec) ~ partressourcespibconveec,
       is.na(partressourcespibconvepr) & (scenario!="obs") ~ partretrpib + soldeconvepr,
       TRUE ~ partressourcespibconvepr),
       soldeconvepr = case_when(
         !is.na(soldeconvepr) ~ soldeconvepr,
-        is.na(soldeconvepr) ~ partressourcespibconvepr-partretrpib
-      ))
+        is.na(soldeconvepr) ~ partressourcespibconvepr-partretrpib)
+      )
 }
 if ("partressourcespibconveec" %in% names(projcor)){
   projcor <- projcor %>%
