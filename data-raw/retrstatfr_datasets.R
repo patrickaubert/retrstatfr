@@ -86,7 +86,7 @@ extrait_projcor <- function(intitule,date){
 #names(tabindics) <- indiccor
 tabindics <- list()
 for (i in c(1:nrow(indiccor))){
-# for (i in c(56:67)){
+# for (i in c(108)){
   tabindics[[paste0(indiccor$intitulecourt[i],paste0(indiccor$datepubli[i]))]] <- extrait_projcor(indiccor$intitulecourt[i],paste0(indiccor$datepubli[i]))
 }
 
@@ -208,6 +208,14 @@ if ("txprelevconveec" %in% names(projcor)){
     mutate(txprelevconveec = if_else(
       is.na(txprelevconveec) & (scenario=="obs"),txprelevconvtcc,txprelevconveec))
 }
+if ("partressourcespibconvtcc" %in% names(projcor)){
+  projcor <- projcor %>%
+    mutate(partressourcespibconvtcc = case_when(
+      !is.na(partressourcespibconvtcc) ~ partressourcespibconvtcc,
+      is.na(partressourcespibconvtcc) & (scenario=="obs") & !is.na(partressourcespibconveec) ~ partressourcespibconveec,
+      TRUE ~ partressourcespibconvtcc)
+    )
+}
 if ("partressourcespibconvepr" %in% names(projcor)){
   projcor <- projcor %>%
     mutate(partressourcespibconvepr = case_when(
@@ -233,6 +241,14 @@ if ("partressourcespibconveec" %in% names(projcor)){
       #  is.na(soldeconveec) ~ partressourcespibconveec-partretrpib
       #)
       )
+}
+if ("revactmoynet" %in% names(projcor)){
+  projcor <- projcor %>%
+    mutate(revactmoynet = case_when(
+      !is.na(revactmoynet) ~ revactmoynet,
+      !is.na(pensmoynette) & !is.na(pensmoynetterel) & pensmoynetterel>0 ~ (pensmoynette/pensmoynetterel),
+      TRUE ~ revactmoynet)
+    )
 }
 projcor <- projcor %>%
   arrange(datepubli,scenario,annee)

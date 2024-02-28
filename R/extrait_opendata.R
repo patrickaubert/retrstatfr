@@ -83,6 +83,14 @@ extrait_opendata <- function(intitule = NULL,
     names(vals)[1] <- "x1"
     vals <- vals %>% mutate(x1=as.character(x1))
 
+    # on redresse le cas où la ligne "obs" est mise en dehors des cases par type d'indicateur
+    if ( ("x2" %in% names(vals)) & ("x1" %in% names(vals)) ){
+      if ( is.na(vals$x1[1]) & !is.na(vals$x1[2]) & grepl("^obs",tolower(vals$x2[1]))  ){
+        vals$x1[1] <- vals$x1[2]
+        vals$x1[2] <- NA_character_
+      }
+    }
+
     # == cas où plusieurs séries étaient dans le fichier excel initial
 
     if (!(is.na(donnees$complzone))) {
