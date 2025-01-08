@@ -2,10 +2,12 @@
 
 export(extrait_eacr)
 export(extrait_opendata)
+export(extrait_tableau_ccss)
 export(recode_modalites_eir)
 importFrom(cellranger,as.cell_limits)
 importFrom(dplyr,recode)
 importFrom(janitor,clean_names)
+importFrom(magrittr,`%>%`)
 importFrom(openxlsx,getSheetNames)
 importFrom(openxlsx,read.xlsx)
 importFrom(stringr,str_replace)

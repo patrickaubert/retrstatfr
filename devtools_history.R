@@ -26,3 +26,4 @@ pkgdown::build_site()
 
 # == 17/02/2023 : (EN COURS) ajout de la table 'indicgen' (à partir des données opendata EACR)
 
+# == 08/01/2025 : création de la fonction 'extrait_tableau_ccss'
