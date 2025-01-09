@@ -16,9 +16,11 @@ extrait_tableau_ccss <- function(
     page = 1,
     position = 1) {
 
+  # *** ci-dessous :divers exemples pour tests :
+
   # pdf_ccss <- "C:/Users/PA/Documents/bases_de_donnees/rapports_CCSS/rapports/2022-09-CCSS.pdf"
-  # pdf_ccss <- "C:/Users/PA/Documents/bases_de_donnees/rapports_CCSS/rapports/CCSS-octobre 2024.pdf"
   # page <- 167
+  # pdf_ccss <- "C:/Users/PA/Documents/bases_de_donnees/rapports_CCSS/rapports/CCSS-octobre 2024.pdf"
 
   # --- récupération du tableau mis en forme
 
@@ -46,15 +48,56 @@ extrait_tableau_ccss <- function(
       niv_indentation = niv_indentation-2,
       txt_init = str_replace_all(tolower(txt_init),"[^[:alpha:]]","")
     ) %>%
-    distinct()
-
-  # attention : il reste un risque de création de doublon, si plusieurs lignes ont le même intitulés (par exemple "autres transferts")
+    distinct() %>%
+    # ci-dessous : pour la gestion des doublons de lignes (ayant le même intitulé : par exemple "autres transferts")
+    # (on utilise le fait que ces intitules identiques apparaissent dans le même ordre dans les deux tables)
+    group_by(txt_init) %>% mutate(txt_init=paste0(txt_init,"#",1:n())) %>% ungroup()
 
   tab <- tab %>%
     mutate(txt_init = str_replace_all(tolower(type),"[^[:alpha:]]","") ) %>%
+    group_by(txt_init) %>% mutate(txt_init=paste0(txt_init,"#",1:n())) %>% ungroup() %>%
     left_join(txt_tab, by="txt_init") %>%
     relocate("niv_indentation",.before="type") %>%
     select(-txt_init)
+
+  # --- création d'intitulés indentés
+
+  nb_indentations <- sort(unique(tab$niv_indentation))
+
+  tab <- tab %>% mutate(niv_indentation_brut=niv_indentation)
+
+  for (i in c(1:NROW(nb_indentations))){
+
+    tab <- tab %>%
+      mutate(niv_indentation = ifelse(niv_indentation_brut==nb_indentations[i],i,
+                                      niv_indentation))
+
+    tab[[paste0("type_",i)]] <- if_else(
+      tab$niv_indentation_brut==nb_indentations[i],
+      tab$type,
+      NA_character_
+    )
+
+  }
+
+  tab <- tab %>%
+    select(-niv_indentation_brut) %>%
+    relocate(c(starts_with("type_")), .after="type") %>%
+    relocate("niv_indentation", .before = "type")
+
+  tab <- tab %>%
+    fill("type_1", .direction="down")
+
+  for (i in c(2:NROW(nb_indentations))){
+
+    tab <- tab %>%
+      group_by( !!sym(paste0("type_",i-1)) ) %>%
+      fill( !!sym(paste0("type_",i)) , .direction="down") %>%
+      ungroup()
+
+  }
+
+  # --- finalisation de la table extraire
 
   return(tab)
 
