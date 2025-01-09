@@ -48,7 +48,7 @@ extrait_tableau_ccss <- function(
       niv_indentation = niv_indentation-2,
       txt_init = str_replace_all(tolower(txt_init),"[^[:alpha:]]","")
     ) %>%
-    distinct() %>%
+    #distinct() %>%
     # ci-dessous : pour la gestion des doublons de lignes (ayant le même intitulé : par exemple "autres transferts")
     # (on utilise le fait que ces intitules identiques apparaissent dans le même ordre dans les deux tables)
     group_by(txt_init) %>% mutate(txt_init=paste0(txt_init,"#",1:n())) %>% ungroup()
