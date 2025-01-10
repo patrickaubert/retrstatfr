@@ -38,16 +38,20 @@ extrait_tableau_ccss <- function(
 
   # --- extraction complémentaire avec pdftools, pour récupérer le niveau d'indentation
 
-  text <- pdftools::pdf_text(pdf_ccss)[167]
+  text <- pdftools::pdf_text(pdf_ccss)[page]
 
   txt_tab <- data.frame(
     txt_init = strsplit(text,"\n")[[1]],
     stringsAsFactors = FALSE   ) %>%
     mutate(
-      niv_indentation = nchar(str_extract(txt_init,"^[[:space:]]+")),
-      niv_indentation = niv_indentation-2,
+      num_tab = cumsum(grepl("^tableau",str_replace_all(tolower(txt_init),"[[:space:]]",""))),
+      niv_indentation = ifelse(!grepl("^[[:space:]]",txt_init),0,
+                               nchar(str_extract(txt_init,"^[[:space:]]+"))),
+      #niv_indentation = niv_indentation-2,
       txt_init = str_replace_all(tolower(txt_init),"[^[:alpha:]]","")
     ) %>%
+    filter(num_tab == position) %>%
+    select(-num_tab) %>%
     #distinct() %>%
     # ci-dessous : pour la gestion des doublons de lignes (ayant le même intitulé : par exemple "autres transferts")
     # (on utilise le fait que ces intitules identiques apparaissent dans le même ordre dans les deux tables)
