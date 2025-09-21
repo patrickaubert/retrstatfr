@@ -66,6 +66,20 @@
 #' }
 "projcor"
 
+#' Taux de retraités par sexe et âge simulés dans le cadre des Projections du conseil d'orientation des retraites (COR)
+#'
+#' Résultats des projections du COR, publiés dans son rapport annuel, pour les indicateurs de taux de retraités
+#'
+#' @format Un data frame avec 8946 observations et 5 variables:
+#' \describe{
+#'   \item{sexe}{Sexe}
+#'   \item{age}{Âge au 31 décembre de l'année (entre 50 et 70 ans)}
+#'   \item{annee}{Année}
+#'   \item{txretr}{Taux de retraités (part de personnes déjà retraitées de droit direct dans la population de l'âge donné)}
+#'   \item{datepubli}{Date de publication du rapport du COR}
+#'   }
+"projcor_txretr"
+
 #' Indicateurs conjoncturels de suivi des retraites en France
 #'
 #' Cette base rassemble divers indicateurs "conjoncturels" de suivi du système de retraite français.
