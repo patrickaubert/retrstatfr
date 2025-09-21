@@ -23,7 +23,7 @@
 #'
 #' Les données proviennent du panorama annuel de la DREES "retraités et retraites", à partir du modèle ANCETRE.
 #'
-#' @format A data frame with 1134 observations and 7 variables:
+#' @format A data frame with 1260 observations and 7 variables:
 #' \describe{
 #'   \item{age}{Age, entre 50 et 70 ans}
 #'   \item{annee}{Année}

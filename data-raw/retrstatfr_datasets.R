@@ -30,6 +30,8 @@ usethis::use_data(txretr, overwrite=TRUE)
 # ===================================================================================
 # données des projections du COR
 
+# ~~~~~~  données principales
+
   # extraction de tous les noms des séries de données tirées du rapport du COR
 indiccor <- sources_opendata %>%
   filter(producteur=="COR",reference=="rapport annuel") %>%
@@ -268,8 +270,39 @@ if (FALSE){
     mutate(absent="XXX") %>% pivot_wider(names_from="indicateur",values_from="absent")
 }
 
+# ~~~~~~  données complémentaires (depuis le rapport de juin 2024)
+
+projcor_compl <- bind_rows(
+  # rapport de juin 2024
+  extrait_excel_cor(
+    url = "https://www.cor-retraites.fr/sites/default/files/2024-09/Donn%C3%A9es_compl%C3%A9mentaires.xlsx"
+  ) %>%
+    mutate(datepubli = "2024-06-13"),
+  # rapport de juin 2025
+  extrait_excel_cor(
+    url = "https://www.cor-retraites.fr/sites/default/files/2025-06/Donn%C3%A9es_compl%C3%A9mentaires_RA2025.xlsx"
+  ) %>%
+    mutate(datepubli = "2025-06-12"),
+
+)
+
+# on sépare les taux de retraités projetés dans un fichier à part
+
+projcor_txretr <- projcor_compl %>%
+  filter( onglet_fichier_excel == "Tx_retraités_an" ) %>%
+  rename(sexe = indicateur, age = scenario, txretr = val) %>%
+  mutate(sexe = recode(sexe, "ENSEMBLE" = "Ensemble")) %>%
+  select(-onglet_fichier_excel)
+
+projcor_compl <- projcor_compl %>%
+  filter( onglet_fichier_excel != "Tx_retraités_an" )
+
+
+
+
+# ~~~~~~  sauvegarde
 
 usethis::use_data(projcor, overwrite=TRUE)
-
+usethis::use_data(projcor_txretr, overwrite=TRUE)
 
 
